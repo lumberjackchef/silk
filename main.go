@@ -23,8 +23,21 @@ func main() {
         // Project tracking folder. This checks if the folder exists, creates it if not.
         path := ".silk"
         if _, err := os.Stat(path); os.IsNotExist(err) {
-          os.Mkdir(path, 0766)
-          fmt.Println("New project created!")
+          if c.NArg() > 0 {
+            os.Mkdir(path, 0766)
+
+            f_config, err := os.Create(".silk/config")
+            check(err)
+            defer f_config.Close()
+
+            project_name := fmt.Sprintf("project_name: %s \n", c.Args().Get(0))
+            _, err2 := f_config.WriteString(project_name)
+            check(err2)
+
+            fmt.Println("New project created!")
+          } else {
+            fmt.Println("No project name specified!")
+          }
         } else {
           fmt.Println("Warning: this is an existing silk project!")
         }
@@ -66,7 +79,7 @@ func main() {
   }
 }
 
-var commandAction = func (f func()) string {
+var commandAction = func(f func()) string {
   path := ".silk"
   if _, err := os.Stat(path); os.IsNotExist(err) {
     fmt.Println("Warning: this is not a silk project! To create a new silk project, run `$ silk new`")
@@ -74,4 +87,10 @@ var commandAction = func (f func()) string {
     f()
   }
   return ""
+}
+
+var check = func(e error) {
+  if e != nil {
+    panic(e)
+  }
 }
