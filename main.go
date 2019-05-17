@@ -5,12 +5,14 @@ import (
   "fmt"
   "log"
   "os"
+  "time"
 
   "github.com/urfave/cli"
 )
 
 type project_meta struct {
-  ProjectName  string  `json:"project_name"`
+  ProjectName  string   `json:"project_name"`
+  InitDate     string   `json:"init_date"`
 }
 
 func main() {
@@ -35,8 +37,11 @@ func main() {
             check(err)
             defer f_config.Close()
 
+            dt := time.Now().String()
+
             project_meta_data, _ := json.Marshal(&project_meta{
-              ProjectName: fmt.Sprintf(c.Args().Get(0)),
+              ProjectName:  fmt.Sprintf(c.Args().Get(0)),
+              InitDate:     dt,
             })
             _, err2 := f_config.WriteString(string(project_meta_data))
             check(err2)
