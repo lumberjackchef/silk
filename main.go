@@ -1,12 +1,17 @@
 package main
 
 import (
+  "encoding/json"
   "fmt"
   "log"
   "os"
 
   "github.com/urfave/cli"
 )
+
+type project_meta struct {
+  ProjectName  string  `json:"project_name"`
+}
 
 func main() {
   app := cli.NewApp()
@@ -30,8 +35,10 @@ func main() {
             check(err)
             defer f_config.Close()
 
-            project_name := fmt.Sprintf("project_name: %s \n", c.Args().Get(0))
-            _, err2 := f_config.WriteString(project_name)
+            project_meta_data, _ := json.Marshal(&project_meta{
+              ProjectName: fmt.Sprintf(c.Args().Get(0)),
+            })
+            _, err2 := f_config.WriteString(string(project_meta_data))
             check(err2)
 
             fmt.Println("New project created!")
