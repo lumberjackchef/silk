@@ -32,22 +32,25 @@ func main() {
         path := ".silk"
         if _, err := os.Stat(path); os.IsNotExist(err) {
           if c.NArg() > 0 {
+            // Creates the silk directory
             os.Mkdir(path, 0766)
 
-            f_meta, err := os.Create(".silk/meta.json")
+            // Creates the project meta json file
+            fMeta, err := os.Create(".silk/meta.json")
             check(err)
-            defer f_meta.Close()
+            defer fMeta.Close()
 
-            dt := time.Now().String()
-
-            project_meta_data, _ := json.MarshalIndent(&ProjectMeta{
+            // Creates the project metadata & writes to the file
+            dT := time.Now().String()
+            projectMetaData, _ := json.MarshalIndent(&ProjectMeta{
               ProjectName:  fmt.Sprintf(c.Args().Get(0)),
-              InitDate:     dt,
+              InitDate:     dT,
               Version:      "0.0.0",
             }, "", "  ")
-            _, err2 := f_meta.WriteString(string(project_meta_data) + "\n")
+            _, err2 := fMeta.WriteString(string(projectMetaData) + "\n")
             check(err2)
 
+            // Confirmation message
             fmt.Println("New project created!")
           } else {
             fmt.Println("No project name specified!")
@@ -55,7 +58,6 @@ func main() {
         } else {
           fmt.Println("Warning: this is an existing silk project!")
         }
-
         return nil
       },
     },
@@ -92,36 +94,36 @@ func main() {
       Action: func(c *cli.Context) error {
         commandAction(
           func() {
-            var meta_data ProjectMeta
+            var metaData ProjectMeta
 
             // Open, check, & defer closing of the meta data file
-            meta_file, meta_file_err := os.Open(".silk/meta.json")
-            check(meta_file_err)
-            defer meta_file.Close()
+            metaFile, metaFileErr := os.Open(".silk/meta.json")
+            check(metaFileErr)
+            defer metaFile.Close()
 
             // Get the []byte version of the json data
-            byte_value, byte_value_err := ioutil.ReadAll(meta_file)
-            check(byte_value_err)
+            byteValue, byteValueErr := ioutil.ReadAll(metaFile)
+            check(byteValueErr)
 
             // Transform the []byte data into usable struct data
-            meta_data_err := json.Unmarshal(byte_value, &meta_data)
-            check(meta_data_err)
+            metaDataErr := json.Unmarshal(byteValue, &metaData)
+            check(metaDataErr)
 
             if c.NArg() > 0 {
               // Change the version & transform back to actual json
-              meta_data.Version = fmt.Sprintf(c.Args().Get(0))
-              meta_data_json, meta_data_json_err := json.MarshalIndent(meta_data, "", " ")
-              check(meta_data_json_err)
+              metaData.Version = fmt.Sprintf(c.Args().Get(0))
+              metaDataJson, metaDataJsonErr := json.MarshalIndent(metaData, "", " ")
+              check(metaDataJsonErr)
 
               // Write the version change to the file
-              meta_file_write_err := ioutil.WriteFile(".silk/meta.json", []byte(string(meta_data_json) + "\n"), 0766)
-              check(meta_file_write_err)
+              metaFileWriteErr := ioutil.WriteFile(".silk/meta.json", []byte(string(metaDataJson) + "\n"), 0766)
+              check(metaFileWriteErr)
 
               // Confirmation message
-              fmt.Println("Version successfull updated to " + meta_data.Version + "!")
+              fmt.Println("Version successfull updated to " + metaData.Version + "!")
             } else {
               // If the user just wants to check the version and not change it
-              fmt.Println(meta_data.Version)
+              fmt.Println(metaData.Version)
             }
           },
         )
