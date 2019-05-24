@@ -11,14 +11,6 @@ import (
   "github.com/urfave/cli"
 )
 
-type ProjectMeta struct {
-  ProjectName string  `json:"project_name"`
-  InitDate    string  `json:"init_date"`
-  Version     string  `json:"version"`
-  Description string  `json:"description"`
-  ProjectUrl  string  `json:"url"`
-}
-
 func main() {
   app := cli.NewApp()
   app.Name = "silk"
@@ -137,21 +129,5 @@ func main() {
   err := app.Run(os.Args)
   if err != nil {
     log.Fatal(err)
-  }
-}
-
-var commandAction = func(f func()) string {
-  path := ".silk"
-  if _, err := os.Stat(path); os.IsNotExist(err) {
-    fmt.Println("Warning: this is not a silk project! To create a new silk project, run `$ silk new`")
-  } else {
-    f()
-  }
-  return ""
-}
-
-var check = func(e error) {
-  if e != nil {
-    panic(e)
   }
 }
