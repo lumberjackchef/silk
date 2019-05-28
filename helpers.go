@@ -26,8 +26,8 @@ func check(e error) {
 }
 
 // Project metadata helper
-func metaFile() *ProjectMeta {
-  var fileData *ProjectMeta
+func metaFile() ProjectMeta {
+  var fileData ProjectMeta
 
   // Open, check, & defer closing of the meta data file
   jsonFile, jsonFileErr := os.Open(".silk/meta.json")
