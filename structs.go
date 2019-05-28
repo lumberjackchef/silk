@@ -1,4 +1,4 @@
-package silk
+package main
 
 type ProjectMeta struct {
   ProjectName string  `json:"project_name"`

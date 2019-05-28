@@ -1,11 +1,13 @@
-package silk
+package main
 
 import (
   "encoding/json"
   "fmt"
   "io/ioutil"
   "log"
+  "path/filepath"
   "os"
+  "strings"
   "time"
 
   "github.com/urfave/cli"
@@ -60,7 +62,27 @@ func main() {
       Aliases: []string{"s"},
       Usage: "Get the status of the current project and/or component.",
       Action: func(c *cli.Context) error {
-        commandAction(func() { fmt.Println("Coming Soon!") })
+        commandAction(
+          func() {
+            // Print status
+            fmt.Println("Project: " + metaFile().ProjectName + "\n")
+
+            // File list, needs to be updated in some way to indicate status
+            var files []string
+            err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
+              // Need to add some sort of .silkignore file here to exclude certain files/types && always ignore the .silk directory files
+              if !info.IsDir() && !strings.HasPrefix(path, ".") {
+                files = append(files, path)
+              }
+              return nil
+            })
+            check(err)
+
+            for _, file := range files{
+              fmt.Println("\t" + file)
+            }
+          },
+        )
         return nil
       },
     },

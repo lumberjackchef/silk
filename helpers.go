@@ -1,7 +1,9 @@
-package silk
+package main
 
 import (
+  "encoding/json"
   "fmt"
+  "io/ioutil"
   "os"
 )
 
@@ -21,4 +23,24 @@ func check(e error) {
   if e != nil {
     panic(e)
   }
+}
+
+// Project metadata helper
+func metaFile() *ProjectMeta {
+  var fileData *ProjectMeta
+
+  // Open, check, & defer closing of the meta data file
+  jsonFile, jsonFileErr := os.Open(".silk/meta.json")
+  check(jsonFileErr)
+  defer jsonFile.Close()
+
+  // Get the []byte version of the json data
+  byteValue, byteValueErr := ioutil.ReadAll(jsonFile)
+  check(byteValueErr)
+
+  // Transform the []byte data into usable struct data
+  jsonDataErr := json.Unmarshal(byteValue, &fileData)
+  check(jsonDataErr)
+
+  return fileData
 }
