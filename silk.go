@@ -107,8 +107,8 @@ func main() {
         commandAction(func() {
           if c.NArg() > 0 {
             // TODO: add SilkRoot() here
-            // TODO: change to lowercase, parameterized version of the arg string
-            var componentDirectory string = fmt.Sprintf(c.Args().Get(0))
+            // Parameterized & lower-cased version of the user input string
+            var componentDirectory string = fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
             var componentConfigDirectory string = componentDirectory + "/.silk-component"
 
             // Component tracking directory. This checks if the directory exists, creates it if not.
