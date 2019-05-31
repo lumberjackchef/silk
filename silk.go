@@ -106,9 +106,9 @@ func main() {
       Action: func(c *cli.Context) error {
         commandAction(func() {
           if c.NArg() > 0 {
-            // TODO: add SilkRoot() here
             // Parameterized & lower-cased version of the user input string
-            var componentDirectory string = fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
+            // TODO: add SilkRoot() here
+            componentDirectory := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
             var componentConfigDirectory string = componentDirectory + "/.silk-component"
 
             // Component tracking directory. This checks if the directory exists, creates it if not.
@@ -123,7 +123,6 @@ func main() {
               defer componentMeta.Close()
 
               // Creates the project metadata & writes to the file
-              // TODO: Change component name to proper case, title-ized version of name
               dT := time.Now().String()
               componentMetaData, _ := json.MarshalIndent(&ComponentMeta{
                 ProjectName:    SilkMetaFile().ProjectName,
@@ -137,7 +136,7 @@ func main() {
               // TODO: Add component to component list file
 
               // Confirmation message
-              fmt.Println("New component" + componentDirectory + "created!")
+              fmt.Println("New component " + componentDirectory + " created!")
             }
             // cd to component directory
             // NOTE: awaiting addition of SilkRoot() above
