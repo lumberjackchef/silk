@@ -35,8 +35,7 @@ func SilkMetaFile() ProjectMeta {
 	var fileData ProjectMeta
 
 	// Open, check, & defer closing of the meta data file
-	// TODO: Add SilkRoot() here
-	jsonFile, jsonFileErr := os.Open(".silk/meta.json")
+	jsonFile, jsonFileErr := os.Open(SilkRoot() + "/.silk/meta.json")
 	check(jsonFileErr)
 	defer jsonFile.Close()
 
@@ -56,13 +55,14 @@ func SilkRoot() string {
 	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
 	check(currentWorkingDirectoryErr)
 
-	returnPath, walkUpErr := walkUp(currentWorkingDirectory)
+	returnPath, walkUpErr := walkUp(currentWorkingDirectory, rootDirectoryName)
 	check(walkUpErr)
 
 	return returnPath
 }
 
-func walkUp(currentPath string) (string, error) {
+// walkUp allows us to walk up the file tree looking for a certain file name as an anchor, returns the directory path of the anchor
+func walkUp(currentPath string, directoryName string) (string, error) {
 	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
 	check(readCurrentPathErr)
 	defer readCurrentPath.Close()
@@ -71,7 +71,7 @@ func walkUp(currentPath string) (string, error) {
 	check(filesInCurrentDirErr)
 
 	for _, file := range filesInCurrentDir {
-		if file.Name() == rootDirectoryName {
+		if file.Name() == directoryName {
 			return currentPath, nil
 		}
 	}
@@ -86,7 +86,7 @@ func walkUp(currentPath string) (string, error) {
 	}
 
 	// Recursion
-	recursiveWalk, recursiveWalkErr := walkUp(filepath.Dir(currentPath))
+	recursiveWalk, recursiveWalkErr := walkUp(filepath.Dir(currentPath), directoryName)
 	check(recursiveWalkErr)
 
 	return recursiveWalk, nil

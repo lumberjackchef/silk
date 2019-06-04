@@ -21,15 +21,23 @@ type ComponentMeta struct {
 	Description   string `json:"description"`
 }
 
-// TODO: Create SilkComponentRoot()
+// SilkComponentRoot returns the component root directory path
+func SilkComponentRoot() string {
+	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
+	check(currentWorkingDirectoryErr)
+
+	returnPath, walkUpErr := walkUp(currentWorkingDirectory, ".silk-component")
+	check(walkUpErr)
+
+	return returnPath
+}
 
 // AddToSilkComponentList adds componentName to the list of components in .silk/components.json
 func AddToSilkComponentList(componentName string) error {
 	var componentFileData ComponentList
 
 	// Open, check, & defer closing of the component list file
-	// TODO: Add SilkRoot() here
-	componentJSONFile, componentJSONFileErr := os.Open(".silk/components.json")
+	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
 	check(componentJSONFileErr)
 	defer componentJSONFile.Close()
 
@@ -47,8 +55,7 @@ func AddToSilkComponentList(componentName string) error {
 	check(componentFileJSONDataErr)
 
 	// Write the component addition to the file
-	// TODO: Add SilkRoot() here
-	componentFileJSONDataWriteErr := ioutil.WriteFile(".silk/components.json", []byte(string(componentFileJSONData)+"\n"), 0766)
+	componentFileJSONDataWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentFileJSONData)+"\n"), 0766)
 	check(componentFileJSONDataWriteErr)
 
 	return nil
@@ -59,8 +66,7 @@ func GetComponentIndex() []string {
 	var componentFileData ComponentList
 
 	// Open, check, & defer closing of the component list file
-	// TODO: Add SilkRoot() here
-	componentJSONFile, componentJSONFileErr := os.Open(".silk/components.json")
+	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
 	check(componentJSONFileErr)
 	defer componentJSONFile.Close()
 

@@ -25,7 +25,7 @@ func main() {
 			Usage:   "Create a new silk project",
 			Action: func(c *cli.Context) error {
 				// Project tracking folder. This checks if the folder exists, creates it if not.
-				// TODO: Add SilkRoot() here
+				// TODO: implement checking similar to SilkRoot() to ensure we're not within the bounds of another project
 				if _, err := os.Stat(rootDirectoryName); os.IsNotExist(err) {
 					if c.NArg() > 0 {
 						// Creates the silk directory
@@ -93,12 +93,14 @@ func main() {
 						// File list
 						// TODO: needs to be updated in some way to indicate status
 						// TODO: Add check for if within component or root
-						// TODO: Add SilkRoot() here
 						// TODO: Add ComponentRoot() here
 						var files []string
-						err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
+						err := filepath.Walk(SilkRoot()+"/", func(path string, info os.FileInfo, err error) error {
 							// TODO: Need to add some sort of .silkignore file here to exclude certain files/types && always ignore the .silk directory files
-							if !info.IsDir() && !strings.HasPrefix(path, ".") {
+							// 		 To ignore by default?: .silk, .silk/*.*, .silk-component, .silk-component/*.*
+							// TODO: Fix the has prefix piece as the parent directories aren't first in the pathname now
+							// TODO: Change all paths to project relative
+							if !info.IsDir() && !strings.HasPrefix(info.Name(), ".") {
 								files = append(files, path)
 							}
 							return nil
@@ -120,7 +122,7 @@ func main() {
 			Usage: "Copies down the project root from remote and sets up all default branches & remotes.",
 			Action: func(c *cli.Context) error {
 				commandAction(func() { fmt.Println("Coming Soon!") })
-				// fmt.Println(SilkRoot())
+				// fmt.Println(SilkComponentRoot())
 				return nil
 			},
 		},
@@ -132,8 +134,8 @@ func main() {
 				commandAction(func() {
 					if c.NArg() > 0 {
 						// Parameterized & lower-cased version of the user input string
-						// TODO: add SilkRoot() here
-						componentDirectory := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
+						// TODO: ensure we're not within another component, ensure we create the component at the root, ensure there's not a component of the same name
+						componentDirectory := SilkRoot() + "/" + fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
 						var componentConfigDirectory = componentDirectory + "/.silk-component"
 
 						// Component tracking directory. This checks if the directory exists, creates it if not.
@@ -165,7 +167,6 @@ func main() {
 							fmt.Println("New component " + componentDirectory + " created!")
 						}
 						// cd to component directory
-						// NOTE: awaiting addition of SilkRoot() above
 						os.Chdir(componentDirectory)
 
 						// TODO: checkout this component's latest working branch branch, `master` for new components
@@ -189,8 +190,7 @@ func main() {
 						var metaData ProjectMeta
 
 						// Open, check, & defer closing of the meta data file
-						// TODO: Add SilkRoot() here
-						metaFile, metaFileErr := os.Open(".silk/meta.json")
+						metaFile, metaFileErr := os.Open(SilkRoot() + "/.silk/meta.json")
 						check(metaFileErr)
 						defer metaFile.Close()
 
@@ -209,8 +209,7 @@ func main() {
 							check(metaDataJSONErr)
 
 							// Write the version change to the file
-							// TODO: Add SilkRoot() here
-							metaFileWriteErr := ioutil.WriteFile(".silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
+							metaFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
 							check(metaFileWriteErr)
 
 							// Confirmation message
@@ -234,8 +233,7 @@ func main() {
 
 // Checks if this is a silk project before running a command
 func commandAction(f func()) string {
-	// TODO: Add SilkRoot() here
-	if _, err := os.Stat(rootDirectoryName); os.IsNotExist(err) {
+	if _, err := os.Stat(SilkRoot() + "/" + rootDirectoryName); os.IsNotExist(err) {
 		fmt.Println("Warning: this is not a silk project! To create a new silk project, run `$ silk new`")
 	} else {
 		f()
