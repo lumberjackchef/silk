@@ -62,8 +62,6 @@ func SilkRoot() string {
 	return returnPath
 }
 
-// TODO: Create SilkComponentRoot()
-
 func walkUp(currentPath string) (string, error) {
 	var returnP, nextUp string
 
@@ -75,6 +73,7 @@ func walkUp(currentPath string) (string, error) {
 
 		// Abstract checking if we're at the root of the file system
 		// TODO: need to ensure this works on containerized environments as well
+		// TODO: loops infintiely if no silk project found
 		systemRoot, systemRootErr := filepath.Match("/", currentPath)
 		check(systemRootErr)
 

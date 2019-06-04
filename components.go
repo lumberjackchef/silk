@@ -2,18 +2,17 @@ package main
 
 import (
 	"encoding/json"
-	// "fmt"
 	"io/ioutil"
 	"os"
 )
 
-// ComponentList ...
+// ComponentList .silk/components.json file structure
 type ComponentList struct {
 	ProjectName   string   `json:"project_name"`
 	ComponentList []string `json:"component_list"`
 }
 
-// ComponentMeta ...
+// ComponentMeta .silk/../{component}/.silk-component/meta.json file structure
 type ComponentMeta struct {
 	ProjectName   string `json:"project_name"`
 	ComponentName string `json:"component_name"`
@@ -22,7 +21,9 @@ type ComponentMeta struct {
 	Description   string `json:"description"`
 }
 
-// AddToSilkComponentList Project metadata helper
+// TODO: Create SilkComponentRoot()
+
+// AddToSilkComponentList adds componentName to the list of components in .silk/components.json
 func AddToSilkComponentList(componentName string) error {
 	var componentFileData ComponentList
 
@@ -53,7 +54,7 @@ func AddToSilkComponentList(componentName string) error {
 	return nil
 }
 
-// GetComponentIndex ...
+// GetComponentIndex duh
 func GetComponentIndex() []string {
 	var componentFileData ComponentList
 

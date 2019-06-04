@@ -117,7 +117,8 @@ func main() {
 			Name:  "clone",
 			Usage: "Copies down the project root from remote and sets up all default branches & remotes.",
 			Action: func(c *cli.Context) error {
-				commandAction(func() { SilkRoot() })
+				commandAction(func() { fmt.Println("Coming Soon!") })
+				// fmt.Println(SilkRoot())
 				return nil
 			},
 		},
