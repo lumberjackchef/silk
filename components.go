@@ -1,52 +1,77 @@
 package main
 
 import (
-  "encoding/json"
-  // "fmt"
-  "io/ioutil"
-  "os"
+	"encoding/json"
+	// "fmt"
+	"io/ioutil"
+	"os"
 )
 
+// ComponentList ...
 type ComponentList struct {
-  ProjectName   string    `json:"project_name"`
-  ComponentList []string  `json:"component_list"`
+	ProjectName   string   `json:"project_name"`
+	ComponentList []string `json:"component_list"`
 }
 
+// ComponentMeta ...
 type ComponentMeta struct {
-  ProjectName   string  `json:"project_name"`
-  ComponentName string  `json:"component_name"`
-  InitDate      string  `json:"init_date"`
-  Version       string  `json:"version"`
-  Description   string  `json:"description"`
+	ProjectName   string `json:"project_name"`
+	ComponentName string `json:"component_name"`
+	InitDate      string `json:"init_date"`
+	Version       string `json:"version"`
+	Description   string `json:"description"`
 }
 
-// Project metadata helper
+// AddToSilkComponentList Project metadata helper
 func AddToSilkComponentList(componentName string) error {
-  var componentFileData ComponentList
+	var componentFileData ComponentList
 
-  // Open, check, & defer closing of the component list file
-  // TODO: Add SilkRoot() here
-  componentJsonFile, componentJsonFileErr := os.Open(".silk/components.json")
-  check(componentJsonFileErr)
-  defer componentJsonFile.Close()
+	// Open, check, & defer closing of the component list file
+	// TODO: Add SilkRoot() here
+	componentJSONFile, componentJSONFileErr := os.Open(".silk/components.json")
+	check(componentJSONFileErr)
+	defer componentJSONFile.Close()
 
-  // Get the []byte version of the json data
-  componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJsonFile)
-  check(componentByteValueErr)
+	// Get the []byte version of the json data
+	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
+	check(componentByteValueErr)
 
-  // Transform the []byte data into usable struct data
-  componentJsonDataErr := json.Unmarshal(componentByteValue, &componentFileData)
-  check(componentJsonDataErr)
+	// Transform the []byte data into usable struct data
+	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
+	check(componentJSONDataErr)
 
-  // Append the component name
-  componentFileData.ComponentList = append(componentFileData.ComponentList, componentName)
-  componentFileJsonData, componentFileJsonDataErr := json.MarshalIndent(componentFileData, "", "  ")
-  check(componentFileJsonDataErr)
+	// Append the component name
+	componentFileData.ComponentList = append(componentFileData.ComponentList, componentName)
+	componentFileJSONData, componentFileJSONDataErr := json.MarshalIndent(componentFileData, "", "  ")
+	check(componentFileJSONDataErr)
 
-  // Write the component addition to the file
-  // TODO: Add SilkRoot() here
-  componentFileJsonDataWriteErr := ioutil.WriteFile(".silk/components.json", []byte(string(componentFileJsonData) + "\n"), 0766)
-  check(componentFileJsonDataWriteErr)
+	// Write the component addition to the file
+	// TODO: Add SilkRoot() here
+	componentFileJSONDataWriteErr := ioutil.WriteFile(".silk/components.json", []byte(string(componentFileJSONData)+"\n"), 0766)
+	check(componentFileJSONDataWriteErr)
 
-  return nil
+	return nil
+}
+
+// GetComponentIndex ...
+func GetComponentIndex() []string {
+	var componentFileData ComponentList
+
+	// Open, check, & defer closing of the component list file
+	// TODO: Add SilkRoot() here
+	componentJSONFile, componentJSONFileErr := os.Open(".silk/components.json")
+	check(componentJSONFileErr)
+	defer componentJSONFile.Close()
+
+	// Get the []byte version of the json data
+	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
+	check(componentByteValueErr)
+
+	// Transform the []byte data into usable struct data
+	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
+	check(componentJSONDataErr)
+
+	// get the list & return it
+
+	return nil // append actual return value later
 }
