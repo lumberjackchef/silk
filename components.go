@@ -71,7 +71,5 @@ func GetComponentIndex() []string {
 	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
 	check(componentJSONDataErr)
 
-	// get the list & return it
-
-	return nil // append actual return value later
+	return componentFileData.ComponentList
 }
