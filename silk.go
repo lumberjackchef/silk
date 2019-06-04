@@ -32,24 +32,45 @@ func main() {
             os.Mkdir(rootDirectoryName, 0766)
 
             // Creates the project meta json file
-            fMeta, err := os.Create(rootDirectoryName + "/meta.json")
-            check(err)
-            defer fMeta.Close()
+            projectMeta, projectMetaErr := os.Create(rootDirectoryName + "/meta.json")
+            check(projectMetaErr)
+            defer projectMeta.Close()
 
             // Creates the project metadata & writes to the file
             dT := time.Now().String()
-            projectMetaData, _ := json.MarshalIndent(&ProjectMeta{
-              ProjectName:  fmt.Sprintf(c.Args().Get(0)),
-              InitDate:     dT,
-              Version:      "0.0.0",
-            }, "", "  ")
-            _, err2 := fMeta.WriteString(string(projectMetaData) + "\n")
-            check(err2)
+            projectMetaData, _ := json.MarshalIndent(
+              &ProjectMeta{
+                ProjectName:  fmt.Sprintf(c.Args().Get(0)),
+                InitDate:     dT,
+                Version:      "0.0.0",
+              },
+              "",
+              "  ",
+            )
 
-            // TODO: Create a blank components list file
+            _, projectMetaWriteErr := projectMeta.WriteString(string(projectMetaData) + "\n")
+            check(projectMetaWriteErr)
+
+            // Create a blank components list file
+            componentsList, componentsListErr := os.Create(rootDirectoryName + "/components.json")
+            check(componentsListErr)
+            defer componentsList.Close()
+
+            // Creates the components data & writes to the file
+            componentsListData, _ := json.MarshalIndent(
+              &ComponentList{
+                ProjectName:    fmt.Sprintf(c.Args().Get(0)),
+                ComponentList:  []string{},
+              },
+              "",
+              "  ",
+            )
+
+            _, componentsListWriteError := componentsList.WriteString(string(componentsListData) + "\n")
+            check(componentsListWriteError)
 
             // Confirmation message
-            fmt.Println("New project" + fmt.Sprintf(c.Args().Get(0)) + "created!")
+            fmt.Println("New project " + fmt.Sprintf(c.Args().Get(0)) + " created!")
           } else {
             fmt.Println("No project name specified!")
           }
@@ -69,7 +90,8 @@ func main() {
             // Print status
             fmt.Println("Project: " + SilkMetaFile().ProjectName + "\n")
 
-            // File list, needs to be updated in some way to indicate status
+            // File list
+            // TODO: needs to be updated in some way to indicate status
             // TODO: Add check for if within component or root
             // TODO: Add SilkRoot() here
             // TODO: Add ComponentRoot() here
@@ -133,7 +155,8 @@ func main() {
               _, componentMetaWriteErr := componentMeta.WriteString(string(componentMetaData) + "\n")
               check(componentMetaWriteErr)
 
-              // TODO: Add component to component list file
+              // Adds component to component list file
+              AddToSilkComponentList(componentDirectory)
 
               // Confirmation message
               fmt.Println("New component " + componentDirectory + " created!")
@@ -148,6 +171,8 @@ func main() {
           }
         })
         return nil
+
+        // TODO add method for removing a component
       },
     },
     {

@@ -33,7 +33,7 @@ func SilkMetaFile() ProjectMeta {
   var fileData ProjectMeta
 
   // Open, check, & defer closing of the meta data file
-  // TODO: Add projectRoot() here
+  // TODO: Add SilkRoot() here
   jsonFile, jsonFileErr := os.Open(".silk/meta.json")
   check(jsonFileErr)
   defer jsonFile.Close()
