@@ -97,7 +97,7 @@ func main() {
 						// TODO: Add ComponentRoot() here
 						var files []string
 						err := filepath.Walk("./", func(path string, info os.FileInfo, err error) error {
-							// Need to add some sort of .silkignore file here to exclude certain files/types && always ignore the .silk directory files
+							// TODO: Need to add some sort of .silkignore file here to exclude certain files/types && always ignore the .silk directory files
 							if !info.IsDir() && !strings.HasPrefix(path, ".") {
 								files = append(files, path)
 							}
@@ -108,6 +108,8 @@ func main() {
 						for _, file := range files {
 							fmt.Println("\t" + file)
 						}
+
+						// TODO: add list of returned files to some sort of hash function & return as a commit hash of some kind
 					},
 				)
 				return nil

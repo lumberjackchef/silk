@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -29,7 +30,7 @@ func check(e error) {
 	}
 }
 
-// SilkMetaFile Project metadata helper
+// SilkMetaFile provides project metadata in an easy to consume format
 func SilkMetaFile() ProjectMeta {
 	var fileData ProjectMeta
 
@@ -50,9 +51,8 @@ func SilkMetaFile() ProjectMeta {
 	return fileData
 }
 
-// SilkRoot Project root helper
+// SilkRoot returns the project root directory path
 func SilkRoot() string {
-	var returnPath string
 	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
 	check(currentWorkingDirectoryErr)
 
@@ -63,42 +63,31 @@ func SilkRoot() string {
 }
 
 func walkUp(currentPath string) (string, error) {
-	var returnP, nextUp string
+	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
+	check(readCurrentPathErr)
+	defer readCurrentPath.Close()
 
-	walkErr := filepath.Walk(currentPath, func(path string, info os.FileInfo, err error) error {
-		// Escape early if there's an error
-		if err != nil {
-			return err
+	filesInCurrentDir, filesInCurrentDirErr := readCurrentPath.Readdir(-1)
+	check(filesInCurrentDirErr)
+
+	for _, file := range filesInCurrentDir {
+		if file.Name() == rootDirectoryName {
+			return currentPath, nil
 		}
-
-		// Abstract checking if we're at the root of the file system
-		// TODO: need to ensure this works on containerized environments as well
-		// TODO: loops infintiely if no silk project found
-		systemRoot, systemRootErr := filepath.Match("/", currentPath)
-		check(systemRootErr)
-
-		// Checks if we're currently in the project root
-		if info.Name() == rootDirectoryName {
-			returnP = filepath.Dir(path)
-			return nil
-
-			// Checks if we're at the system root.
-		} else if systemRoot {
-			return errors.New("warning: This is the root of the local machine or environment. Please switch to the appropriate directory to continue")
-
-			// Gives us the next level up in the tree to check.
-		} else {
-			nextUp = filepath.Dir(path)
-			return nil
-		}
-	})
-
-	// Handle recursion outside of the walk function
-	if returnP == "" && walkErr == nil && nextUp != "" {
-		returnP, walkErr := walkUp(nextUp)
-		return returnP, walkErr
 	}
 
-	// Fallthrough. This is the only return likely to have an error state
-	return returnP, walkErr
+	// Checks if we're at the root
+	userRoot, userRootErr := filepath.Match("/", currentPath)
+	check(userRootErr)
+
+	if userRoot {
+		fmt.Println("warning: This is the root of the local machine or environment \n Please switch to the appropriate directory to continue")
+		return "", errors.New("Root directory reached")
+	}
+
+	// Recursion
+	recursiveWalk, recursiveWalkErr := walkUp(filepath.Dir(currentPath))
+	check(recursiveWalkErr)
+
+	return recursiveWalk, nil
 }
