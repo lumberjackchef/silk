@@ -76,11 +76,11 @@ func walkUp(currentPath string, directoryName string) (string, error) {
 		}
 	}
 
-	// Checks if we're at the root
+	// Checks if we're at the root, returns an error if true
+	// TODO: Make sure this works with all filesystem types including containerized environments
 	userRoot, userRootErr := filepath.Match("/", currentPath)
 	check(userRootErr)
 
-	// TODO: Return a better error without panic()-ing
 	if userRoot {
 		fmt.Println("warning: This is the root of the local machine or environment \n Please switch to the appropriate directory to continue")
 		return "", errors.New("Root directory reached")

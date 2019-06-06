@@ -122,7 +122,7 @@ func main() {
 			Usage: "Copies down the project root from remote and sets up all default branches & remotes.",
 			Action: func(c *cli.Context) error {
 				commandAction(func() { fmt.Println("Coming Soon!") })
-				// fmt.Println(SilkComponentRoot())
+				// fmt.Println(IsComponentOrRoot())
 				return nil
 			},
 		},
@@ -248,14 +248,49 @@ func IsComponentOrRoot() string {
 	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
 	check(currentWorkingDirectoryErr)
 
-	// TODO: Need to replace walkUp here as it only checks one or the other
-	// 		 OR change walkUp to take a slice of strings as the check path (likely the better implementation)
-	componentReturnPath, componentReturnPathErr := walkUp(currentWorkingDirectory, ".silk-component")
-	check(componentReturnPathErr)
+	checkReturnPath, checkReturnPathErr := checkWalkUp(currentWorkingDirectory)
+	check(checkReturnPathErr)
 
-	if componentReturnPath != "" {
+	if checkReturnPath == "component" {
 		partType = "component"
+	} else if checkReturnPath == "root" {
+		partType = "root"
+	} else {
+		partType = "false"
 	}
 
 	return partType
+}
+
+// need a separate function solely for recursion
+func checkWalkUp(currentPath string) (string, error) {
+	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
+	check(readCurrentPathErr)
+	defer readCurrentPath.Close()
+
+	filesInCurrentDir, filesInCurrentDirErr := readCurrentPath.Readdir(-1)
+	check(filesInCurrentDirErr)
+
+	for _, file := range filesInCurrentDir {
+		if file.Name() == rootDirectoryName {
+			return "root", nil
+		} else if file.Name() == ".silk-component" {
+			return "component", nil
+		}
+	}
+
+	// Checks if we're at the root, returns an error if true
+	// TODO: Make sure this works with all filesystem types including containerized environments
+	userRoot, userRootErr := filepath.Match("/", currentPath)
+	check(userRootErr)
+
+	if userRoot {
+		return "", nil
+	}
+
+	// Recursion
+	recursiveWalk, recursiveWalkErr := checkWalkUp(filepath.Dir(currentPath))
+	check(recursiveWalkErr)
+
+	return recursiveWalk, nil
 }
