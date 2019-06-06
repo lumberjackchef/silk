@@ -21,7 +21,7 @@ type ProjectMeta struct {
 }
 
 // Error checking & logging
-// TODO: impolement better logging/error handling. Panic is not the only way to handle an error
+// TODO: implement better logging/error handling. Panic is not the only way to handle an error
 //       need to implement recovers as well
 // TODO: Move all error handling to an errors.go file/package?
 func check(e error) {
@@ -80,6 +80,7 @@ func walkUp(currentPath string, directoryName string) (string, error) {
 	userRoot, userRootErr := filepath.Match("/", currentPath)
 	check(userRootErr)
 
+	// TODO: Return a better error without panic()-ing
 	if userRoot {
 		fmt.Println("warning: This is the root of the local machine or environment \n Please switch to the appropriate directory to continue")
 		return "", errors.New("Root directory reached")

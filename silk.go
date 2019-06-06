@@ -240,3 +240,22 @@ func commandAction(f func()) string {
 	}
 	return ""
 }
+
+// IsComponentOrRoot returns component, root, or false
+func IsComponentOrRoot() string {
+	var partType string
+
+	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
+	check(currentWorkingDirectoryErr)
+
+	// TODO: Need to replace walkUp here as it only checks one or the other
+	// 		 OR change walkUp to take a slice of strings as the check path (likely the better implementation)
+	componentReturnPath, componentReturnPathErr := walkUp(currentWorkingDirectory, ".silk-component")
+	check(componentReturnPathErr)
+
+	if componentReturnPath != "" {
+		partType = "component"
+	}
+
+	return partType
+}

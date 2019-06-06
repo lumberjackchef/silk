@@ -61,7 +61,7 @@ func AddToSilkComponentList(componentName string) error {
 	return nil
 }
 
-// GetComponentIndex duh
+// GetComponentIndex returns a slice that lists all the components in .silk/components.json
 func GetComponentIndex() []string {
 	var componentFileData ComponentList
 
