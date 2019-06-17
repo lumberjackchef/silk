@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -61,6 +60,7 @@ func SilkRoot() string {
 	return returnPath
 }
 
+// TODO: combine with global checkWalkUp
 // walkUp allows us to walk up the file tree looking for a certain file name as an anchor, returns the directory path of the anchor
 func walkUp(currentPath string, directoryName string) (string, error) {
 	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
@@ -78,11 +78,12 @@ func walkUp(currentPath string, directoryName string) (string, error) {
 
 	// Checks if we're at the root, returns an error if true
 	// TODO: Make sure this works with all filesystem types including containerized environments
+	// Mac: '/', Windows: 'C:\', Linux: '/', (Docker: '/'?)
 	userRoot, userRootErr := filepath.Match("/", currentPath)
 	check(userRootErr)
 
 	if userRoot {
-		fmt.Println("warning: This is the root of the local machine or environment \n Please switch to the appropriate directory to continue")
+		// TODO: this should invoke the "not a silk project" line instead
 		return "", errors.New("Root directory reached")
 	}
 

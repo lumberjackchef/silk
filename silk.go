@@ -6,14 +6,20 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/urfave/cli"
 )
 
 func main() {
+	// Colors setup
+	cNotice := color.New(color.FgGreen).SprintFunc()
+	cWarning := color.New(color.FgYellow).SprintFunc()
+	cBold := color.New(color.Bold).SprintFunc()
+
+	// Application setup
 	app := cli.NewApp()
 	app.Name = "silk"
 	app.Usage = "A modern version control paradigm for service oriented architectures."
@@ -70,12 +76,12 @@ func main() {
 						check(componentsListWriteError)
 
 						// Confirmation message
-						fmt.Println("New project " + fmt.Sprintf(c.Args().Get(0)) + " created!")
+						fmt.Println("\tNew project " + cNotice(fmt.Sprintf(c.Args().Get(0))) + " created!")
 					} else {
-						fmt.Println("No project name specified!")
+						fmt.Printf("\t%s No project name specified!\n", cWarning("Warning:"))
 					}
 				} else {
-					fmt.Println("Warning: this is an existing silk project!")
+					fmt.Printf("\t%s this is an existing silk project!\n", cWarning("Warning:"))
 				}
 				return nil
 			},
@@ -88,30 +94,21 @@ func main() {
 				commandAction(
 					func() {
 						// Print status
-						fmt.Println("Project: " + SilkMetaFile().ProjectName + "\n")
+						fmt.Printf("\t%s "+SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
 
-						// File list
-						// TODO: needs to be updated in some way to indicate status
-						// TODO: Add check for if within component or root
-						// TODO: Add ComponentRoot() here
-						var files []string
-						err := filepath.Walk(SilkRoot()+"/", func(path string, info os.FileInfo, err error) error {
-							// TODO: Need to add some sort of .silkignore file here to exclude certain files/types && always ignore the .silk directory files
-							// 		 To ignore by default?: .silk, .silk/*.*, .silk-component, .silk-component/*.*
-							// TODO: Fix the has prefix piece as the parent directories aren't first in the pathname now
-							// TODO: Change all paths to project relative
-							if !info.IsDir() && !strings.HasPrefix(info.Name(), ".") {
-								files = append(files, path)
-							}
-							return nil
-						})
-						check(err)
-
-						for _, file := range files {
-							fmt.Println("\t" + file)
+						if IsComponentOrRoot() == "component" {
+							os.Chdir(SilkComponentRoot())
+						} else {
+							os.Chdir(SilkRoot())
 						}
 
-						// TODO: add list of returned files to some sort of hash function & return as a commit hash of some kind
+						currentWorkingDirectory, _ := os.Getwd()
+
+						// File list
+						files := ComposeFileList(currentWorkingDirectory)
+
+						// Print the file status
+						ListFilesInCommitBuffer(files)
 					},
 				)
 				return nil
@@ -121,8 +118,7 @@ func main() {
 			Name:  "clone",
 			Usage: "Copies down the project root from remote and sets up all default branches & remotes.",
 			Action: func(c *cli.Context) error {
-				commandAction(func() { fmt.Println("Coming Soon!") })
-				// fmt.Println(IsComponentOrRoot())
+				commandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
 		},
@@ -133,10 +129,12 @@ func main() {
 			Action: func(c *cli.Context) error {
 				commandAction(func() {
 					if c.NArg() > 0 {
+						// TODO: add method for removing a component, likely via a flag?
+
 						// Parameterized & lower-cased version of the user input string
-						// TODO: ensure we're not within another component, ensure we create the component at the root, ensure there's not a component of the same name
-						componentDirectory := SilkRoot() + "/" + fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
-						var componentConfigDirectory = componentDirectory + "/.silk-component"
+						componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
+						componentDirectory := SilkRoot() + "/" + componentName
+						componentConfigDirectory := componentDirectory + "/.silk-component"
 
 						// Component tracking directory. This checks if the directory exists, creates it if not.
 						_, componentConfigErr := os.Stat(componentConfigDirectory)
@@ -153,7 +151,7 @@ func main() {
 							dT := time.Now().String()
 							componentMetaData, _ := json.MarshalIndent(&ComponentMeta{
 								ProjectName:   SilkMetaFile().ProjectName,
-								ComponentName: componentDirectory,
+								ComponentName: componentName,
 								InitDate:      dT,
 								Version:       "0.0.0",
 							}, "", "  ")
@@ -161,23 +159,26 @@ func main() {
 							check(componentMetaWriteErr)
 
 							// Adds component to component list file
-							AddToSilkComponentList(componentDirectory)
+							AddToSilkComponentList(componentName)
 
 							// Confirmation message
-							fmt.Println("New component " + componentDirectory + " created!")
+							fmt.Printf("\tNew component %s created!\n", cBold(componentName))
+						} else {
+							fmt.Printf("\t%s component %s already exists!\n", cWarning("Warning:"), cBold(componentName))
 						}
-						// cd to component directory
-						os.Chdir(componentDirectory)
-
-						// TODO: checkout this component's latest working branch branch, `master` for new components
 					} else {
-						// TODO: list an index of components
-						fmt.Println(GetComponentIndex())
+						// Lists index of components
+						if len(GetComponentIndex()) > 0 {
+							fmt.Println(cNotice("\tComponents in project " + SilkMetaFile().ProjectName + ":"))
+							for _, component := range GetComponentIndex() {
+								fmt.Println("\t\t" + component)
+							}
+						} else {
+							fmt.Printf("\t%s There are no components in the current project.\n", cWarning("Warning:"))
+						}
 					}
 				})
 				return nil
-
-				// TODO add method for removing a component
 			},
 		},
 		{
@@ -213,13 +214,34 @@ func main() {
 							check(metaFileWriteErr)
 
 							// Confirmation message
-							fmt.Println("Version successfull updated to " + metaData.Version + "!")
+							fmt.Println("\tVersion successfully updated to " + cNotice(metaData.Version) + "!")
 						} else {
 							// If the user just wants to check the version and not change it
-							fmt.Println(metaData.Version)
+							fmt.Println("\t" + cNotice(metaData.Version))
 						}
 					},
 				)
+				return nil
+			},
+		},
+		{
+			Name:  "add",
+			Usage: "Adds a file or files to the current commit buffer",
+			Action: func(c *cli.Context) error {
+				// TODO: Add a list of files to a commit buffer
+				commandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
+				return nil
+			},
+		},
+		{
+			Name:  "commit",
+			Usage: "Tags the current commit buffer and resets all file statuses",
+			Action: func(c *cli.Context) error {
+
+				// TODO: add list of files in commit buffer to some sort of hash function
+				// TODO: return as a commit hash of some kind when committing
+				// TODO: add commit message ability
+				commandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
 		},
@@ -229,68 +251,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-// Checks if this is a silk project before running a command
-func commandAction(f func()) string {
-	if _, err := os.Stat(SilkRoot() + "/" + rootDirectoryName); os.IsNotExist(err) {
-		fmt.Println("Warning: this is not a silk project! To create a new silk project, run `$ silk new`")
-	} else {
-		f()
-	}
-	return ""
-}
-
-// IsComponentOrRoot returns component, root, or false
-func IsComponentOrRoot() string {
-	var partType string
-
-	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
-	check(currentWorkingDirectoryErr)
-
-	checkReturnPath, checkReturnPathErr := checkWalkUp(currentWorkingDirectory)
-	check(checkReturnPathErr)
-
-	if checkReturnPath == "component" {
-		partType = "component"
-	} else if checkReturnPath == "root" {
-		partType = "root"
-	} else {
-		partType = "false"
-	}
-
-	return partType
-}
-
-// need a separate function solely for recursion
-func checkWalkUp(currentPath string) (string, error) {
-	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
-	check(readCurrentPathErr)
-	defer readCurrentPath.Close()
-
-	filesInCurrentDir, filesInCurrentDirErr := readCurrentPath.Readdir(-1)
-	check(filesInCurrentDirErr)
-
-	for _, file := range filesInCurrentDir {
-		if file.Name() == rootDirectoryName {
-			return "root", nil
-		} else if file.Name() == ".silk-component" {
-			return "component", nil
-		}
-	}
-
-	// Checks if we're at the root, returns an error if true
-	// TODO: Make sure this works with all filesystem types including containerized environments
-	userRoot, userRootErr := filepath.Match("/", currentPath)
-	check(userRootErr)
-
-	if userRoot {
-		return "", nil
-	}
-
-	// Recursion
-	recursiveWalk, recursiveWalkErr := checkWalkUp(filepath.Dir(currentPath))
-	check(recursiveWalkErr)
-
-	return recursiveWalk, nil
 }
