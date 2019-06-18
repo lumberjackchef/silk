@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -177,37 +176,7 @@ func main() {
 			Action: func(c *cli.Context) error {
 				commandAction(
 					func() {
-						var metaData ProjectMeta
-
-						// Open, check, & defer closing of the meta data file
-						metaFile, metaFileErr := os.Open(SilkRoot() + "/.silk/meta.json")
-						check(metaFileErr)
-						defer metaFile.Close()
-
-						// Get the []byte version of the json data
-						byteValue, byteValueErr := ioutil.ReadAll(metaFile)
-						check(byteValueErr)
-
-						// Transform the []byte data into usable struct data
-						metaDataErr := json.Unmarshal(byteValue, &metaData)
-						check(metaDataErr)
-
-						if c.NArg() > 0 {
-							// Change the version & transform back to actual json
-							metaData.Version = fmt.Sprintf(c.Args().Get(0))
-							metaDataJSON, metaDataJSONErr := json.MarshalIndent(metaData, "", " ")
-							check(metaDataJSONErr)
-
-							// Write the version change to the file
-							metaFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
-							check(metaFileWriteErr)
-
-							// Confirmation message
-							fmt.Println("\tVersion successfully updated to " + cNotice(metaData.Version) + "!")
-						} else {
-							// If the user just wants to check the version and not change it
-							fmt.Println("\t" + cNotice(metaData.Version))
-						}
+						PrintOrChangeVersion(c)
 					},
 				)
 				return nil
@@ -217,7 +186,12 @@ func main() {
 			Name:  "add",
 			Usage: "Adds a file or files to the current commit buffer",
 			Action: func(c *cli.Context) error {
-				// TODO: Add a list of files to a commit buffer
+				// TODO: Add a list of changes to files to a commit buffer
+				// Check if the root commit exists
+				// diff whole files first to eliminate unchanged files
+				// diff changed files line by line
+				// add changes to a commit buffer file
+				// should be file name, line number, & actual code changes
 				commandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
@@ -226,8 +200,7 @@ func main() {
 			Name:  "commit",
 			Usage: "Tags the current commit buffer and resets all file statuses",
 			Action: func(c *cli.Context) error {
-
-				// TODO: add list of files in commit buffer to some sort of hash function
+				// TODO: add commit buffer to some sort of hash function
 				// TODO: return as a commit hash of some kind when committing
 				// TODO: add commit message ability
 				commandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
