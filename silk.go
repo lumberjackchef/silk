@@ -132,8 +132,7 @@ func main() {
 					if c.NArg() > 0 {
 						// Parameterized & lower-cased version of the user input string
 						componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
-						componentDirectory := SilkRoot() + "/" + componentName
-						componentConfigDirectory := componentDirectory + "/.silk-component"
+						componentConfigDirectory := SilkRoot() + "/" + componentName + "/.silk-component"
 
 						CreateComponentsListFile(componentName, componentConfigDirectory)
 					} else {
