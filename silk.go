@@ -24,6 +24,9 @@ func main() {
 	app.Name = "silk"
 	app.Usage = "A modern version control paradigm for service oriented architectures."
 
+	// Allows for bash completion of commands & subcommands
+	app.EnableBashCompletion = true
+
 	app.Commands = []cli.Command{
 		{
 			Name:    "new",
@@ -129,8 +132,6 @@ func main() {
 			Action: func(c *cli.Context) error {
 				commandAction(func() {
 					if c.NArg() > 0 {
-						// TODO: add method for removing a component, likely via a flag?
-
 						// Parameterized & lower-cased version of the user input string
 						componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
 						componentDirectory := SilkRoot() + "/" + componentName
@@ -179,6 +180,67 @@ func main() {
 					}
 				})
 				return nil
+			},
+			Subcommands: []cli.Command{
+				{
+					Name:  "remove",
+					Usage: "remove an existing component",
+					Action: func(c *cli.Context) error {
+						commandAction(func() {
+							if c.NArg() > 0 {
+								// Parameterized & lower-cased version of the user input string
+								componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
+								componentDirectory := SilkRoot() + "/" + componentName
+
+								_, componentErr := os.Stat(componentDirectory)
+
+								if componentErr == nil {
+									var cList ComponentList
+
+									// Remove the component files
+									os.RemoveAll(componentDirectory)
+
+									// remove the component from the components.json list
+									// open & read components file
+									componentsList, componentsListErr := os.Open(SilkRoot() + "/.silk/components.json")
+									check(componentsListErr)
+									defer componentsList.Close()
+
+									// get byte value of components file
+									byteValue, byteValueErr := ioutil.ReadAll(componentsList)
+									check(byteValueErr)
+
+									// unmarshall the data into the ComponentList struct
+									cListErr := json.Unmarshal(byteValue, &cList)
+									check(cListErr)
+
+									// remove the component from the list []string
+									for index, value := range cList.ComponentList {
+										if value == componentName {
+											cList.ComponentList = append(cList.ComponentList[:index], cList.ComponentList[index+1:]...)
+										}
+									}
+
+									// transform back to JSON
+									componentsListJSON, componentsListJSONErr := json.MarshalIndent(cList, "", " ")
+									check(componentsListJSONErr)
+
+									// Write the version change to the file
+									componentFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentsListJSON)+"\n"), 0766)
+									check(componentFileWriteErr)
+
+									// Confirmation message
+									fmt.Println("\tComponent " + cBold(componentName) + " successfully removed!")
+								} else {
+									fmt.Printf("\t%s No component matching that name exists.\n", cWarning("Error:"))
+								}
+							} else {
+								fmt.Printf("\t%s No component name specified.\n", cWarning("Error:"))
+							}
+						})
+						return nil
+					},
+				},
 			},
 		},
 		{
