@@ -17,7 +17,6 @@ func main() {
 	// Colors setup
 	cNotice := color.New(color.FgGreen).SprintFunc()
 	cWarning := color.New(color.FgYellow).SprintFunc()
-	cBold := color.New(color.Bold).SprintFunc()
 
 	// Application setup
 	app := cli.NewApp()
@@ -137,36 +136,7 @@ func main() {
 						componentDirectory := SilkRoot() + "/" + componentName
 						componentConfigDirectory := componentDirectory + "/.silk-component"
 
-						// Component tracking directory. This checks if the directory exists, creates it if not.
-						_, componentConfigErr := os.Stat(componentConfigDirectory)
-						if os.IsNotExist(componentConfigErr) {
-							// creates the '{component}/.silk-component directory as well as the {component} directory if one or both don't exist
-							os.MkdirAll(componentConfigDirectory, 0766)
-
-							// Creates the project meta json file
-							componentMeta, componentMetaErr := os.Create(componentConfigDirectory + "/meta.json")
-							check(componentMetaErr)
-							defer componentMeta.Close()
-
-							// Creates the project metadata & writes to the file
-							dT := time.Now().String()
-							componentMetaData, _ := json.MarshalIndent(&ComponentMeta{
-								ProjectName:   SilkMetaFile().ProjectName,
-								ComponentName: componentName,
-								InitDate:      dT,
-								Version:       "0.0.0",
-							}, "", "  ")
-							_, componentMetaWriteErr := componentMeta.WriteString(string(componentMetaData) + "\n")
-							check(componentMetaWriteErr)
-
-							// Adds component to component list file
-							AddToSilkComponentList(componentName)
-
-							// Confirmation message
-							fmt.Printf("\tNew component %s created!\n", cBold(componentName))
-						} else {
-							fmt.Printf("\t%s component %s already exists!\n", cWarning("Warning:"), cBold(componentName))
-						}
+						CreateComponentsListFile(componentName, componentConfigDirectory)
 					} else {
 						// Lists index of components
 						if len(GetComponentIndex()) > 0 {
@@ -190,50 +160,7 @@ func main() {
 							if c.NArg() > 0 {
 								// Parameterized & lower-cased version of the user input string
 								componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
-								componentDirectory := SilkRoot() + "/" + componentName
-
-								_, componentErr := os.Stat(componentDirectory)
-
-								if componentErr == nil {
-									var cList ComponentList
-
-									// Remove the component files
-									os.RemoveAll(componentDirectory)
-
-									// remove the component from the components.json list
-									// open & read components file
-									componentsList, componentsListErr := os.Open(SilkRoot() + "/.silk/components.json")
-									check(componentsListErr)
-									defer componentsList.Close()
-
-									// get byte value of components file
-									byteValue, byteValueErr := ioutil.ReadAll(componentsList)
-									check(byteValueErr)
-
-									// unmarshall the data into the ComponentList struct
-									cListErr := json.Unmarshal(byteValue, &cList)
-									check(cListErr)
-
-									// remove the component from the list []string
-									for index, value := range cList.ComponentList {
-										if value == componentName {
-											cList.ComponentList = append(cList.ComponentList[:index], cList.ComponentList[index+1:]...)
-										}
-									}
-
-									// transform back to JSON
-									componentsListJSON, componentsListJSONErr := json.MarshalIndent(cList, "", " ")
-									check(componentsListJSONErr)
-
-									// Write the version change to the file
-									componentFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentsListJSON)+"\n"), 0766)
-									check(componentFileWriteErr)
-
-									// Confirmation message
-									fmt.Println("\tComponent " + cBold(componentName) + " successfully removed!")
-								} else {
-									fmt.Printf("\t%s No component matching that name exists.\n", cWarning("Error:"))
-								}
+								RemoveComponent(componentName)
 							} else {
 								fmt.Printf("\t%s No component name specified.\n", cWarning("Error:"))
 							}
