@@ -67,6 +67,33 @@ func AddToSilkComponentList(componentName string) error {
 	return nil
 }
 
+// ComponentCommand creates new component if arg provided, shows the index if not
+func ComponentCommand(c *cli.Context) error {
+	CommandAction(func() {
+		cWarning := color.New(color.FgYellow).SprintFunc()
+		cNotice := color.New(color.FgGreen).SprintFunc()
+
+		if c.NArg() > 0 {
+			// Parameterized & lower-cased version of the user input string
+			componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
+			componentConfigDirectory := SilkRoot() + "/" + componentName + "/.silk-component"
+
+			CreateComponentsListFile(componentName, componentConfigDirectory)
+		} else {
+			// Lists index of components
+			if len(GetComponentIndex()) > 0 {
+				fmt.Println(cNotice("\tComponents in project " + SilkMetaFile().ProjectName + ":"))
+				for _, component := range GetComponentIndex() {
+					fmt.Println("\t\t" + component)
+				}
+			} else {
+				fmt.Printf("\t%s There are no components in the current project.\n", cWarning("Warning:"))
+			}
+		}
+	})
+	return nil
+}
+
 // CreateComponentsListFile creates {silk root}/components.json file
 func CreateComponentsListFile(componentName string, componentConfigDirectory string) {
 	// Colors setup
@@ -103,6 +130,26 @@ func CreateComponentsListFile(componentName string, componentConfigDirectory str
 	} else {
 		fmt.Printf("\t%s component %s already exists!\n", cWarning("Warning:"), cBold(componentName))
 	}
+}
+
+// GetComponentIndex returns a slice that lists all the components in .silk/components.json
+func GetComponentIndex() []string {
+	var componentFileData ComponentList
+
+	// Open, Check, & defer closing of the component list file
+	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
+	Check(componentJSONFileErr)
+	defer componentJSONFile.Close()
+
+	// Get the []byte version of the json data
+	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
+	Check(componentByteValueErr)
+
+	// Transform the []byte data into usable struct data
+	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
+	Check(componentJSONDataErr)
+
+	return componentFileData.ComponentList
 }
 
 // RemoveComponent removes the component from the Components List (obvi)
@@ -164,24 +211,4 @@ func RemoveComponent(c *cli.Context) error {
 		}
 	})
 	return nil
-}
-
-// GetComponentIndex returns a slice that lists all the components in .silk/components.json
-func GetComponentIndex() []string {
-	var componentFileData ComponentList
-
-	// Open, Check, & defer closing of the component list file
-	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
-	Check(componentJSONFileErr)
-	defer componentJSONFile.Close()
-
-	// Get the []byte version of the json data
-	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
-	Check(componentByteValueErr)
-
-	// Transform the []byte data into usable struct data
-	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
-	Check(componentJSONDataErr)
-
-	return componentFileData.ComponentList
 }

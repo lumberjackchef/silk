@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -128,28 +127,7 @@ func main() {
 			Name:    "component",
 			Aliases: []string{"c"},
 			Usage:   "If no arguments, lists all components in the current project. If a name is supplied, this will either move to the component, clone from remote & move to the component, or it will create a new component of name [name]",
-			Action: func(c *cli.Context) error {
-				cmd.CommandAction(func() {
-					if c.NArg() > 0 {
-						// Parameterized & lower-cased version of the user input string
-						componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
-						componentConfigDirectory := cmd.SilkRoot() + "/" + componentName + "/.silk-component"
-
-						cmd.CreateComponentsListFile(componentName, componentConfigDirectory)
-					} else {
-						// Lists index of components
-						if len(cmd.GetComponentIndex()) > 0 {
-							fmt.Println(cNotice("\tComponents in project " + cmd.SilkMetaFile().ProjectName + ":"))
-							for _, component := range cmd.GetComponentIndex() {
-								fmt.Println("\t\t" + component)
-							}
-						} else {
-							fmt.Printf("\t%s There are no components in the current project.\n", cWarning("Warning:"))
-						}
-					}
-				})
-				return nil
-			},
+			Action:  cmd.ComponentCommand,
 			Subcommands: []cli.Command{
 				{
 					Name:   "remove",
