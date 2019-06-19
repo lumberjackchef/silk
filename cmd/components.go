@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/urfave/cli"
 )
 
 // ComponentList .silk/components.json file structure
@@ -104,54 +106,64 @@ func CreateComponentsListFile(componentName string, componentConfigDirectory str
 }
 
 // RemoveComponent removes the component from the Components List (obvi)
-func RemoveComponent(componentName string) {
-	// Colors setup
-	cWarning := color.New(color.FgYellow).SprintFunc()
-	cBold := color.New(color.Bold).SprintFunc()
+func RemoveComponent(c *cli.Context) error {
+	CommandAction(func() {
+		// Colors setup
+		cWarning := color.New(color.FgYellow).SprintFunc()
+		cBold := color.New(color.Bold).SprintFunc()
 
-	componentDirectory := SilkRoot() + "/" + componentName
-	_, componentErr := os.Stat(componentDirectory)
+		if c.NArg() > 0 {
+			// Parameterized & lower-cased version of the user input string
+			componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
 
-	if componentErr == nil {
-		var cList ComponentList
+			componentDirectory := SilkRoot() + "/" + componentName
+			_, componentErr := os.Stat(componentDirectory)
 
-		// Remove the component files
-		os.RemoveAll(componentDirectory)
+			if componentErr == nil {
+				var cList ComponentList
 
-		// remove the component from the components.json list
-		// open & read components file
-		componentsList, componentsListErr := os.Open(SilkRoot() + "/.silk/components.json")
-		Check(componentsListErr)
-		defer componentsList.Close()
+				// Remove the component files
+				os.RemoveAll(componentDirectory)
 
-		// get byte value of components file
-		byteValue, byteValueErr := ioutil.ReadAll(componentsList)
-		Check(byteValueErr)
+				// remove the component from the components.json list
+				// open & read components file
+				componentsList, componentsListErr := os.Open(SilkRoot() + "/.silk/components.json")
+				Check(componentsListErr)
+				defer componentsList.Close()
 
-		// unmarshall the data into the ComponentList struct
-		cListErr := json.Unmarshal(byteValue, &cList)
-		Check(cListErr)
+				// get byte value of components file
+				byteValue, byteValueErr := ioutil.ReadAll(componentsList)
+				Check(byteValueErr)
 
-		// remove the component from the list []string
-		for index, value := range cList.ComponentList {
-			if value == componentName {
-				cList.ComponentList = append(cList.ComponentList[:index], cList.ComponentList[index+1:]...)
+				// unmarshall the data into the ComponentList struct
+				cListErr := json.Unmarshal(byteValue, &cList)
+				Check(cListErr)
+
+				// remove the component from the list []string
+				for index, value := range cList.ComponentList {
+					if value == componentName {
+						cList.ComponentList = append(cList.ComponentList[:index], cList.ComponentList[index+1:]...)
+					}
+				}
+
+				// transform back to JSON
+				componentsListJSON, componentsListJSONErr := json.MarshalIndent(cList, "", " ")
+				Check(componentsListJSONErr)
+
+				// Write the version change to the file
+				componentFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentsListJSON)+"\n"), 0766)
+				Check(componentFileWriteErr)
+
+				// Confirmation message
+				fmt.Println("\tComponent " + cBold(componentName) + " successfully removed!")
+			} else {
+				fmt.Printf("\t%s No component matching that name exists.\n", cWarning("Error:"))
 			}
+		} else {
+			fmt.Printf("\t%s No component name specified.\n", cWarning("Error:"))
 		}
-
-		// transform back to JSON
-		componentsListJSON, componentsListJSONErr := json.MarshalIndent(cList, "", " ")
-		Check(componentsListJSONErr)
-
-		// Write the version change to the file
-		componentFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentsListJSON)+"\n"), 0766)
-		Check(componentFileWriteErr)
-
-		// Confirmation message
-		fmt.Println("\tComponent " + cBold(componentName) + " successfully removed!")
-	} else {
-		fmt.Printf("\t%s No component matching that name exists.\n", cWarning("Error:"))
-	}
+	})
+	return nil
 }
 
 // GetComponentIndex returns a slice that lists all the components in .silk/components.json

@@ -152,20 +152,9 @@ func main() {
 			},
 			Subcommands: []cli.Command{
 				{
-					Name:  "remove",
-					Usage: "remove an existing component",
-					Action: func(c *cli.Context) error {
-						cmd.CommandAction(func() {
-							if c.NArg() > 0 {
-								// Parameterized & lower-cased version of the user input string
-								componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
-								cmd.RemoveComponent(componentName)
-							} else {
-								fmt.Printf("\t%s No component name specified.\n", cWarning("Error:"))
-							}
-						})
-						return nil
-					},
+					Name:   "remove",
+					Usage:  "remove an existing component",
+					Action: cmd.RemoveComponent,
 				},
 			},
 		},

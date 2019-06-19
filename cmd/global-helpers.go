@@ -8,7 +8,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// Checks if this is a silk project before running a command
+// CommandAction checks if this is a silk project before running a command
 func CommandAction(f func()) string {
 	cWarning := color.New(color.FgYellow).SprintFunc()
 
