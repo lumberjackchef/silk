@@ -9,10 +9,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-)
 
-// RootDirectoryName ...
-var RootDirectoryName = ".silk"
+	"github.com/lumberjackchef/silk/helper"
+)
 
 // ProjectMeta ...
 type ProjectMeta struct {
@@ -23,32 +22,22 @@ type ProjectMeta struct {
 	ProjectURL  string `json:"url"`
 }
 
-// Check provides basic error checking & logging
-// TODO: implement better logging/error handling. Panic is not the only way to handle an error
-//       need to implement recovers as well
-// TODO: Move all error handling to an errors.go file/package?
-func Check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
-
 // SilkMetaFile provides project metadata in an easy to consume format
 func SilkMetaFile() ProjectMeta {
 	var fileData ProjectMeta
 
 	// Open, check, & defer closing of the meta data file
 	jsonFile, jsonFileErr := os.Open(SilkRoot() + "/.silk/meta.json")
-	Check(jsonFileErr)
+	helper.Check(jsonFileErr)
 	defer jsonFile.Close()
 
 	// Get the []byte version of the json data
 	byteValue, byteValueErr := ioutil.ReadAll(jsonFile)
-	Check(byteValueErr)
+	helper.Check(byteValueErr)
 
 	// Transform the []byte data into usable struct data
 	jsonDataErr := json.Unmarshal(byteValue, &fileData)
-	Check(jsonDataErr)
+	helper.Check(jsonDataErr)
 
 	return fileData
 }
@@ -56,10 +45,10 @@ func SilkMetaFile() ProjectMeta {
 // SilkRoot returns the project root directory path
 func SilkRoot() string {
 	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
-	Check(currentWorkingDirectoryErr)
+	helper.Check(currentWorkingDirectoryErr)
 
-	returnPath, walkUpErr := walkUp(currentWorkingDirectory, RootDirectoryName)
-	Check(walkUpErr)
+	returnPath, walkUpErr := walkUp(currentWorkingDirectory, helper.RootDirectoryName)
+	helper.Check(walkUpErr)
 
 	return returnPath
 }
@@ -68,11 +57,11 @@ func SilkRoot() string {
 // walkUp allows us to walk up the file tree looking for a certain file name as an anchor, returns the directory path of the anchor
 func walkUp(currentPath string, directoryName string) (string, error) {
 	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
-	Check(readCurrentPathErr)
+	helper.Check(readCurrentPathErr)
 	defer readCurrentPath.Close()
 
 	filesInCurrentDir, filesInCurrentDirErr := readCurrentPath.Readdir(-1)
-	Check(filesInCurrentDirErr)
+	helper.Check(filesInCurrentDirErr)
 
 	for _, file := range filesInCurrentDir {
 		if file.Name() == directoryName {
@@ -84,7 +73,7 @@ func walkUp(currentPath string, directoryName string) (string, error) {
 	// TODO: Make sure this works with all filesystem types including containerized environments
 	// Mac: '/', Windows: 'C:\', Linux: '/', (Docker: '/'?)
 	userRoot, userRootErr := filepath.Match("/", currentPath)
-	Check(userRootErr)
+	helper.Check(userRootErr)
 
 	if userRoot {
 		// TODO: this should invoke the "not a silk project" line instead
@@ -93,7 +82,7 @@ func walkUp(currentPath string, directoryName string) (string, error) {
 
 	// Recursion
 	recursiveWalk, recursiveWalkErr := walkUp(filepath.Dir(currentPath), directoryName)
-	Check(recursiveWalkErr)
+	helper.Check(recursiveWalkErr)
 
 	return recursiveWalk, nil
 }

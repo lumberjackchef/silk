@@ -9,6 +9,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/lumberjackchef/silk/cmd"
+	"github.com/lumberjackchef/silk/helper"
 	"github.com/urfave/cli"
 )
 
@@ -33,14 +34,14 @@ func main() {
 			Action: func(c *cli.Context) error {
 				// Project tracking folder. This checks if the folder exists, creates it if not.
 				// TODO: implement checking similar to SilkRoot() to ensure we're not within the bounds of another project
-				if _, err := os.Stat(cmd.RootDirectoryName); os.IsNotExist(err) {
+				if _, err := os.Stat(helper.RootDirectoryName); os.IsNotExist(err) {
 					if c.NArg() > 0 {
 						// Creates the silk directory
-						os.Mkdir(cmd.RootDirectoryName, 0766)
+						os.Mkdir(helper.RootDirectoryName, 0766)
 
 						// Creates the project meta json file
-						projectMeta, projectMetaErr := os.Create(cmd.RootDirectoryName + "/meta.json")
-						cmd.Check(projectMetaErr)
+						projectMeta, projectMetaErr := os.Create(helper.RootDirectoryName + "/meta.json")
+						helper.Check(projectMetaErr)
 						defer projectMeta.Close()
 
 						// Creates the project metadata & writes to the file
@@ -56,11 +57,11 @@ func main() {
 						)
 
 						_, projectMetaWriteErr := projectMeta.WriteString(string(projectMetaData) + "\n")
-						cmd.Check(projectMetaWriteErr)
+						helper.Check(projectMetaWriteErr)
 
 						// Create a blank components list file
-						componentsList, componentsListErr := os.Create(cmd.RootDirectoryName + "/components.json")
-						cmd.Check(componentsListErr)
+						componentsList, componentsListErr := os.Create(helper.RootDirectoryName + "/components.json")
+						helper.Check(componentsListErr)
 						defer componentsList.Close()
 
 						// Creates the components data & writes to the file
@@ -74,7 +75,7 @@ func main() {
 						)
 
 						_, componentsListWriteError := componentsList.WriteString(string(componentsListData) + "\n")
-						cmd.Check(componentsListWriteError)
+						helper.Check(componentsListWriteError)
 
 						// Confirmation message
 						fmt.Println("\tNew project " + cNotice(fmt.Sprintf(c.Args().Get(0))) + " created!")
@@ -92,12 +93,12 @@ func main() {
 			Aliases: []string{"s"},
 			Usage:   "Get the status of the current project and/or component.",
 			Action: func(c *cli.Context) error {
-				cmd.CommandAction(
+				helper.CommandAction(
 					func() {
 						// Print status
 						fmt.Printf("\t%s "+cmd.SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
 
-						if cmd.IsComponentOrRoot() == "component" {
+						if helper.IsComponentOrRoot() == "component" {
 							os.Chdir(cmd.SilkComponentRoot())
 						} else {
 							os.Chdir(cmd.SilkRoot())
@@ -119,7 +120,7 @@ func main() {
 			Name:  "clone",
 			Usage: "Copies down the project root from remote and sets up all default branches & remotes.",
 			Action: func(c *cli.Context) error {
-				cmd.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
+				helper.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
 		},
@@ -141,7 +142,7 @@ func main() {
 			Aliases: []string{"v"},
 			Usage:   "Lists or edits the current version of the project",
 			Action: func(c *cli.Context) error {
-				cmd.CommandAction(
+				helper.CommandAction(
 					func() {
 						cmd.PrintOrChangeVersion(c)
 					},
@@ -159,7 +160,7 @@ func main() {
 				// diff changed files line by line
 				// add changes to a commit buffer file
 				// should be file name, line number, & actual code changes
-				cmd.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
+				helper.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
 		},
@@ -170,7 +171,7 @@ func main() {
 				// TODO: add commit buffer to some sort of hash function
 				// TODO: return as a commit hash of some kind when committing
 				// TODO: add commit message ability
-				cmd.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
+				helper.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
 		},

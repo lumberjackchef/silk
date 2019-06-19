@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/lumberjackchef/silk/helper"
 	"github.com/urfave/cli"
 )
 
@@ -19,26 +20,26 @@ func PrintOrChangeVersion(c *cli.Context) string {
 
 	// Open, check, & defer closing of the meta data file
 	metaFile, metaFileErr := os.Open(SilkRoot() + "/.silk/meta.json")
-	Check(metaFileErr)
+	helper.Check(metaFileErr)
 	defer metaFile.Close()
 
 	// Get the []byte version of the json data
 	byteValue, byteValueErr := ioutil.ReadAll(metaFile)
-	Check(byteValueErr)
+	helper.Check(byteValueErr)
 
 	// Transform the []byte data into usable struct data
 	metaDataErr := json.Unmarshal(byteValue, &metaData)
-	Check(metaDataErr)
+	helper.Check(metaDataErr)
 
 	if c.NArg() > 0 {
 		// Change the version & transform back to actual json
 		metaData.Version = fmt.Sprintf(c.Args().Get(0))
 		metaDataJSON, metaDataJSONErr := json.MarshalIndent(metaData, "", " ")
-		Check(metaDataJSONErr)
+		helper.Check(metaDataJSONErr)
 
 		// Write the version change to the file
 		metaFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
-		Check(metaFileWriteErr)
+		helper.Check(metaFileWriteErr)
 
 		// Confirmation message
 		fmt.Println("\tVersion successfully updated to " + cNotice(metaData.Version) + "!")

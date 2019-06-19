@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/lumberjackchef/silk/helper"
 )
 
 // ComposeFileList gathers a list of all relevant files for showing current status
@@ -15,7 +17,7 @@ func ComposeFileList(currentWorkingDirectory string) []string {
 	// Add all match patterns to the exclusion list so we don't read the file on every loop iteration
 	if _, err := os.Stat(SilkRoot() + "/.silk-ignore"); !os.IsNotExist(err) {
 		ignoreFile, ignoreFileErr := os.Open(SilkRoot() + "/.silk-ignore")
-		Check(ignoreFileErr)
+		helper.Check(ignoreFileErr)
 		defer ignoreFile.Close()
 
 		scanner := bufio.NewScanner(ignoreFile)
@@ -52,7 +54,7 @@ func ComposeFileList(currentWorkingDirectory string) []string {
 		}
 		return nil
 	})
-	Check(err)
+	helper.Check(err)
 
 	return files
 }
