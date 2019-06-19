@@ -1,3 +1,6 @@
+/*
+Package cmd is a package for all the root commands for Silk
+*/
 package cmd
 
 import (
