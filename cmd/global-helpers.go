@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 )
 
 // Checks if this is a silk project before running a command
-func commandAction(f func()) string {
+func CommandAction(f func()) string {
 	cWarning := color.New(color.FgYellow).SprintFunc()
 
 	if IsComponentOrRoot() == "false" {
@@ -25,10 +25,10 @@ func IsComponentOrRoot() string {
 	var partType string
 
 	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
-	check(currentWorkingDirectoryErr)
+	Check(currentWorkingDirectoryErr)
 
 	checkReturnPath, checkReturnPathErr := checkWalkUp(currentWorkingDirectory)
-	check(checkReturnPathErr)
+	Check(checkReturnPathErr)
 
 	if checkReturnPath == "component" {
 		partType = "component"
@@ -44,14 +44,14 @@ func IsComponentOrRoot() string {
 // need a separate function solely for recursion
 func checkWalkUp(currentPath string) (string, error) {
 	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
-	check(readCurrentPathErr)
+	Check(readCurrentPathErr)
 	defer readCurrentPath.Close()
 
 	filesInCurrentDir, filesInCurrentDirErr := readCurrentPath.Readdir(-1)
-	check(filesInCurrentDirErr)
+	Check(filesInCurrentDirErr)
 
 	for _, file := range filesInCurrentDir {
-		if file.Name() == rootDirectoryName {
+		if file.Name() == RootDirectoryName {
 			return "root", nil
 		} else if file.Name() == ".silk-component" {
 			return "component", nil
@@ -62,7 +62,7 @@ func checkWalkUp(currentPath string) (string, error) {
 	// TODO: Make sure this works with all filesystem types including containerized environments
 	// Mac: '/', Windows: 'C:\', Linux: '/', (Docker: '/'?)
 	userRoot, userRootErr := filepath.Match("/", currentPath)
-	check(userRootErr)
+	Check(userRootErr)
 
 	if userRoot {
 		return "", nil
@@ -70,7 +70,7 @@ func checkWalkUp(currentPath string) (string, error) {
 
 	// Recursion
 	recursiveWalk, recursiveWalkErr := checkWalkUp(filepath.Dir(currentPath))
-	check(recursiveWalkErr)
+	Check(recursiveWalkErr)
 
 	return recursiveWalk, nil
 }

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -28,10 +28,10 @@ type ComponentMeta struct {
 // SilkComponentRoot returns the component root directory path
 func SilkComponentRoot() string {
 	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
-	check(currentWorkingDirectoryErr)
+	Check(currentWorkingDirectoryErr)
 
 	returnPath, walkUpErr := walkUp(currentWorkingDirectory, ".silk-component")
-	check(walkUpErr)
+	Check(walkUpErr)
 
 	return returnPath
 }
@@ -40,27 +40,27 @@ func SilkComponentRoot() string {
 func AddToSilkComponentList(componentName string) error {
 	var componentFileData ComponentList
 
-	// Open, check, & defer closing of the component list file
+	// Open, Check, & defer closing of the component list file
 	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
-	check(componentJSONFileErr)
+	Check(componentJSONFileErr)
 	defer componentJSONFile.Close()
 
 	// Get the []byte version of the json data
 	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
-	check(componentByteValueErr)
+	Check(componentByteValueErr)
 
 	// Transform the []byte data into usable struct data
 	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
-	check(componentJSONDataErr)
+	Check(componentJSONDataErr)
 
 	// Append the component name
 	componentFileData.ComponentList = append(componentFileData.ComponentList, componentName)
 	componentFileJSONData, componentFileJSONDataErr := json.MarshalIndent(componentFileData, "", "  ")
-	check(componentFileJSONDataErr)
+	Check(componentFileJSONDataErr)
 
 	// Write the component addition to the file
 	componentFileJSONDataWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentFileJSONData)+"\n"), 0766)
-	check(componentFileJSONDataWriteErr)
+	Check(componentFileJSONDataWriteErr)
 
 	return nil
 }
@@ -71,7 +71,7 @@ func CreateComponentsListFile(componentName string, componentConfigDirectory str
 	cWarning := color.New(color.FgYellow).SprintFunc()
 	cBold := color.New(color.Bold).SprintFunc()
 
-	// Component tracking directory. This checks if the directory exists, creates it if not.
+	// Component tracking directory. This Checks if the directory exists, creates it if not.
 	_, componentConfigErr := os.Stat(componentConfigDirectory)
 	if os.IsNotExist(componentConfigErr) {
 		// creates the '{component}/.silk-component directory as well as the {component} directory if one or both don't exist
@@ -79,7 +79,7 @@ func CreateComponentsListFile(componentName string, componentConfigDirectory str
 
 		// Creates the project meta json file
 		componentMeta, componentMetaErr := os.Create(componentConfigDirectory + "/meta.json")
-		check(componentMetaErr)
+		Check(componentMetaErr)
 		defer componentMeta.Close()
 
 		// Creates the project metadata & writes to the file
@@ -91,7 +91,7 @@ func CreateComponentsListFile(componentName string, componentConfigDirectory str
 			Version:       "0.0.0",
 		}, "", "  ")
 		_, componentMetaWriteErr := componentMeta.WriteString(string(componentMetaData) + "\n")
-		check(componentMetaWriteErr)
+		Check(componentMetaWriteErr)
 
 		// Adds component to component list file
 		AddToSilkComponentList(componentName)
@@ -121,16 +121,16 @@ func RemoveComponent(componentName string) {
 		// remove the component from the components.json list
 		// open & read components file
 		componentsList, componentsListErr := os.Open(SilkRoot() + "/.silk/components.json")
-		check(componentsListErr)
+		Check(componentsListErr)
 		defer componentsList.Close()
 
 		// get byte value of components file
 		byteValue, byteValueErr := ioutil.ReadAll(componentsList)
-		check(byteValueErr)
+		Check(byteValueErr)
 
 		// unmarshall the data into the ComponentList struct
 		cListErr := json.Unmarshal(byteValue, &cList)
-		check(cListErr)
+		Check(cListErr)
 
 		// remove the component from the list []string
 		for index, value := range cList.ComponentList {
@@ -141,11 +141,11 @@ func RemoveComponent(componentName string) {
 
 		// transform back to JSON
 		componentsListJSON, componentsListJSONErr := json.MarshalIndent(cList, "", " ")
-		check(componentsListJSONErr)
+		Check(componentsListJSONErr)
 
 		// Write the version change to the file
 		componentFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentsListJSON)+"\n"), 0766)
-		check(componentFileWriteErr)
+		Check(componentFileWriteErr)
 
 		// Confirmation message
 		fmt.Println("\tComponent " + cBold(componentName) + " successfully removed!")
@@ -158,18 +158,18 @@ func RemoveComponent(componentName string) {
 func GetComponentIndex() []string {
 	var componentFileData ComponentList
 
-	// Open, check, & defer closing of the component list file
+	// Open, Check, & defer closing of the component list file
 	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
-	check(componentJSONFileErr)
+	Check(componentJSONFileErr)
 	defer componentJSONFile.Close()
 
 	// Get the []byte version of the json data
 	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
-	check(componentByteValueErr)
+	Check(componentByteValueErr)
 
 	// Transform the []byte data into usable struct data
 	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
-	check(componentJSONDataErr)
+	Check(componentJSONDataErr)
 
 	return componentFileData.ComponentList
 }

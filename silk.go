@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/lumberjackchef/silk/cmd"
 	"github.com/urfave/cli"
 )
 
@@ -33,20 +34,20 @@ func main() {
 			Action: func(c *cli.Context) error {
 				// Project tracking folder. This checks if the folder exists, creates it if not.
 				// TODO: implement checking similar to SilkRoot() to ensure we're not within the bounds of another project
-				if _, err := os.Stat(rootDirectoryName); os.IsNotExist(err) {
+				if _, err := os.Stat(cmd.RootDirectoryName); os.IsNotExist(err) {
 					if c.NArg() > 0 {
 						// Creates the silk directory
-						os.Mkdir(rootDirectoryName, 0766)
+						os.Mkdir(cmd.RootDirectoryName, 0766)
 
 						// Creates the project meta json file
-						projectMeta, projectMetaErr := os.Create(rootDirectoryName + "/meta.json")
-						check(projectMetaErr)
+						projectMeta, projectMetaErr := os.Create(cmd.RootDirectoryName + "/meta.json")
+						cmd.Check(projectMetaErr)
 						defer projectMeta.Close()
 
 						// Creates the project metadata & writes to the file
 						dT := time.Now().String()
 						projectMetaData, _ := json.MarshalIndent(
-							&ProjectMeta{
+							&cmd.ProjectMeta{
 								ProjectName: fmt.Sprintf(c.Args().Get(0)),
 								InitDate:    dT,
 								Version:     "0.0.0",
@@ -56,16 +57,16 @@ func main() {
 						)
 
 						_, projectMetaWriteErr := projectMeta.WriteString(string(projectMetaData) + "\n")
-						check(projectMetaWriteErr)
+						cmd.Check(projectMetaWriteErr)
 
 						// Create a blank components list file
-						componentsList, componentsListErr := os.Create(rootDirectoryName + "/components.json")
-						check(componentsListErr)
+						componentsList, componentsListErr := os.Create(cmd.RootDirectoryName + "/components.json")
+						cmd.Check(componentsListErr)
 						defer componentsList.Close()
 
 						// Creates the components data & writes to the file
 						componentsListData, _ := json.MarshalIndent(
-							&ComponentList{
+							&cmd.ComponentList{
 								ProjectName:   fmt.Sprintf(c.Args().Get(0)),
 								ComponentList: []string{},
 							},
@@ -74,7 +75,7 @@ func main() {
 						)
 
 						_, componentsListWriteError := componentsList.WriteString(string(componentsListData) + "\n")
-						check(componentsListWriteError)
+						cmd.Check(componentsListWriteError)
 
 						// Confirmation message
 						fmt.Println("\tNew project " + cNotice(fmt.Sprintf(c.Args().Get(0))) + " created!")
@@ -92,24 +93,24 @@ func main() {
 			Aliases: []string{"s"},
 			Usage:   "Get the status of the current project and/or component.",
 			Action: func(c *cli.Context) error {
-				commandAction(
+				cmd.CommandAction(
 					func() {
 						// Print status
-						fmt.Printf("\t%s "+SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
+						fmt.Printf("\t%s "+cmd.SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
 
-						if IsComponentOrRoot() == "component" {
-							os.Chdir(SilkComponentRoot())
+						if cmd.IsComponentOrRoot() == "component" {
+							os.Chdir(cmd.SilkComponentRoot())
 						} else {
-							os.Chdir(SilkRoot())
+							os.Chdir(cmd.SilkRoot())
 						}
 
 						currentWorkingDirectory, _ := os.Getwd()
 
 						// File list
-						files := ComposeFileList(currentWorkingDirectory)
+						files := cmd.ComposeFileList(currentWorkingDirectory)
 
 						// Print the file status
-						ListFilesInCommitBuffer(files)
+						cmd.ListFilesInCommitBuffer(files)
 					},
 				)
 				return nil
@@ -119,7 +120,7 @@ func main() {
 			Name:  "clone",
 			Usage: "Copies down the project root from remote and sets up all default branches & remotes.",
 			Action: func(c *cli.Context) error {
-				commandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
+				cmd.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
 		},
@@ -128,18 +129,18 @@ func main() {
 			Aliases: []string{"c"},
 			Usage:   "If no arguments, lists all components in the current project. If a name is supplied, this will either move to the component, clone from remote & move to the component, or it will create a new component of name [name]",
 			Action: func(c *cli.Context) error {
-				commandAction(func() {
+				cmd.CommandAction(func() {
 					if c.NArg() > 0 {
 						// Parameterized & lower-cased version of the user input string
 						componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
-						componentConfigDirectory := SilkRoot() + "/" + componentName + "/.silk-component"
+						componentConfigDirectory := cmd.SilkRoot() + "/" + componentName + "/.silk-component"
 
-						CreateComponentsListFile(componentName, componentConfigDirectory)
+						cmd.CreateComponentsListFile(componentName, componentConfigDirectory)
 					} else {
 						// Lists index of components
-						if len(GetComponentIndex()) > 0 {
-							fmt.Println(cNotice("\tComponents in project " + SilkMetaFile().ProjectName + ":"))
-							for _, component := range GetComponentIndex() {
+						if len(cmd.GetComponentIndex()) > 0 {
+							fmt.Println(cNotice("\tComponents in project " + cmd.SilkMetaFile().ProjectName + ":"))
+							for _, component := range cmd.GetComponentIndex() {
 								fmt.Println("\t\t" + component)
 							}
 						} else {
@@ -154,11 +155,11 @@ func main() {
 					Name:  "remove",
 					Usage: "remove an existing component",
 					Action: func(c *cli.Context) error {
-						commandAction(func() {
+						cmd.CommandAction(func() {
 							if c.NArg() > 0 {
 								// Parameterized & lower-cased version of the user input string
 								componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
-								RemoveComponent(componentName)
+								cmd.RemoveComponent(componentName)
 							} else {
 								fmt.Printf("\t%s No component name specified.\n", cWarning("Error:"))
 							}
@@ -173,9 +174,9 @@ func main() {
 			Aliases: []string{"v"},
 			Usage:   "Lists or edits the current version of the project",
 			Action: func(c *cli.Context) error {
-				commandAction(
+				cmd.CommandAction(
 					func() {
-						PrintOrChangeVersion(c)
+						cmd.PrintOrChangeVersion(c)
 					},
 				)
 				return nil
@@ -191,7 +192,7 @@ func main() {
 				// diff changed files line by line
 				// add changes to a commit buffer file
 				// should be file name, line number, & actual code changes
-				commandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
+				cmd.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
 		},
@@ -202,7 +203,7 @@ func main() {
 				// TODO: add commit buffer to some sort of hash function
 				// TODO: return as a commit hash of some kind when committing
 				// TODO: add commit message ability
-				commandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
+				cmd.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 				return nil
 			},
 		},

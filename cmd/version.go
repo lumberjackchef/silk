@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -19,26 +19,26 @@ func PrintOrChangeVersion(c *cli.Context) string {
 
 	// Open, check, & defer closing of the meta data file
 	metaFile, metaFileErr := os.Open(SilkRoot() + "/.silk/meta.json")
-	check(metaFileErr)
+	Check(metaFileErr)
 	defer metaFile.Close()
 
 	// Get the []byte version of the json data
 	byteValue, byteValueErr := ioutil.ReadAll(metaFile)
-	check(byteValueErr)
+	Check(byteValueErr)
 
 	// Transform the []byte data into usable struct data
 	metaDataErr := json.Unmarshal(byteValue, &metaData)
-	check(metaDataErr)
+	Check(metaDataErr)
 
 	if c.NArg() > 0 {
 		// Change the version & transform back to actual json
 		metaData.Version = fmt.Sprintf(c.Args().Get(0))
 		metaDataJSON, metaDataJSONErr := json.MarshalIndent(metaData, "", " ")
-		check(metaDataJSONErr)
+		Check(metaDataJSONErr)
 
 		// Write the version change to the file
 		metaFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
-		check(metaFileWriteErr)
+		Check(metaFileWriteErr)
 
 		// Confirmation message
 		fmt.Println("\tVersion successfully updated to " + cNotice(metaData.Version) + "!")

@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"bufio"
@@ -10,14 +10,12 @@ import (
 
 // ComposeFileList gathers a list of all relevant files for showing current status
 func ComposeFileList(currentWorkingDirectory string) []string {
-	var files []string
-	var exclusionList []string
+	var files, exclusionList []string
 
+	// Add all match patterns to the exclusion list so we don't read the file on every loop iteration
 	if _, err := os.Stat(SilkRoot() + "/.silk-ignore"); !os.IsNotExist(err) {
-		// Read the file
-		// open the file for reading
 		ignoreFile, ignoreFileErr := os.Open(SilkRoot() + "/.silk-ignore")
-		check(ignoreFileErr)
+		Check(ignoreFileErr)
 		defer ignoreFile.Close()
 
 		scanner := bufio.NewScanner(ignoreFile)
@@ -26,6 +24,7 @@ func ComposeFileList(currentWorkingDirectory string) []string {
 		}
 	}
 
+	// Get the list of files in the project
 	err := filepath.Walk(currentWorkingDirectory, func(path string, info os.FileInfo, err error) error {
 		// Ignore non-project related files
 		IsNotExcluded := true
@@ -53,7 +52,7 @@ func ComposeFileList(currentWorkingDirectory string) []string {
 		}
 		return nil
 	})
-	check(err)
+	Check(err)
 
 	return files
 }
