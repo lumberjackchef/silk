@@ -12,7 +12,7 @@ import (
 )
 
 // RootDirectoryName ...
-var RootDirectoryName = ".silk"
+const RootDirectoryName = ".silk"
 
 // Check provides basic error checking & logging
 // TODO: implement better logging/error handling. Panic is not the only way to handle an error
