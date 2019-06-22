@@ -1,20 +1,14 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
-	"github.com/fatih/color"
 	"github.com/lumberjackchef/silk/cmd"
-	"github.com/lumberjackchef/silk/helper"
 	"github.com/urfave/cli"
 )
 
 func main() {
-	// Colors setup
-	cNotice := color.New(color.FgGreen).SprintFunc()
-
 	// Application setup
 	app := cli.NewApp()
 	app.Name = "silk"
@@ -38,14 +32,7 @@ func main() {
 			Usage:   "Get the status of the current project and/or component.",
 			Action:  cmd.StatusCommand,
 		},
-		{
-			Name:  "clone",
-			Usage: "Copies down the project root from remote and sets up all default branches & remotes.",
-			Action: func(c *cli.Context) error {
-				helper.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
-				return nil
-			},
-		},
+		cmd.Clone(),
 		{
 			Name:    "component",
 			Aliases: []string{"c"},
