@@ -20,12 +20,7 @@ func main() {
 	app.Commands = []cli.Command{
 		// TODO: redo this so that cmd.New, etc returns all this in one line
 		// 			 these should be named like the command line args (cmd.New, cmd.Status, etc)
-		{
-			Name:    "new",
-			Aliases: []string{"n"},
-			Usage:   "Create a new silk project",
-			Action:  cmd.CreateNewProject,
-		},
+		cmd.New(),
 		{
 			Name:    "status",
 			Aliases: []string{"s"},
