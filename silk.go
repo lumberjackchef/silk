@@ -24,6 +24,8 @@ func main() {
 	app.EnableBashCompletion = true
 
 	app.Commands = []cli.Command{
+		// TODO: redo this so that cmd.New, etc returns all this in one line
+		// 			 these should be named like the command line args (cmd.New, cmd.Status, etc)
 		{
 			Name:    "new",
 			Aliases: []string{"n"},
@@ -61,14 +63,7 @@ func main() {
 			Name:    "version",
 			Aliases: []string{"v"},
 			Usage:   "Lists or edits the current version of the project",
-			Action: func(c *cli.Context) error {
-				helper.CommandAction(
-					func() {
-						cmd.PrintOrChangeVersion(c)
-					},
-				)
-				return nil
-			},
+			Action:  cmd.PrintOrChangeVersion,
 		},
 		{
 			Name:  "add",
