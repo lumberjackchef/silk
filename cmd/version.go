@@ -16,10 +16,10 @@ func PrintOrChangeVersion(c *cli.Context) string {
 	// Colors setup
 	cNotice := color.New(color.FgGreen).SprintFunc()
 
-	var metaData ProjectMeta
+	var metaData helper.ProjectMeta
 
 	// Open, check, & defer closing of the meta data file
-	metaFile, metaFileErr := os.Open(SilkRoot() + "/.silk/meta.json")
+	metaFile, metaFileErr := os.Open(helper.SilkRoot() + "/.silk/meta.json")
 	helper.Check(metaFileErr)
 	defer metaFile.Close()
 
@@ -38,7 +38,7 @@ func PrintOrChangeVersion(c *cli.Context) string {
 		helper.Check(metaDataJSONErr)
 
 		// Write the version change to the file
-		metaFileWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
+		metaFileWriteErr := ioutil.WriteFile(helper.SilkRoot()+"/.silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
 		helper.Check(metaFileWriteErr)
 
 		// Confirmation message

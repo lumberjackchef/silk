@@ -36,7 +36,7 @@ func CreateNewProject(c *cli.Context) error {
 				// Creates the project metadata & writes to the file
 				dT := time.Now().String()
 				projectMetaData, _ := json.MarshalIndent(
-					&ProjectMeta{
+					&helper.ProjectMeta{
 						ProjectName: fmt.Sprintf(c.Args().Get(0)),
 						InitDate:    dT,
 						Version:     "0.0.0",
@@ -55,7 +55,7 @@ func CreateNewProject(c *cli.Context) error {
 
 				// Creates the components data & writes to the file
 				componentsListData, _ := json.MarshalIndent(
-					&ComponentList{
+					&helper.ComponentList{
 						ProjectName:   fmt.Sprintf(c.Args().Get(0)),
 						ComponentList: []string{},
 					},
