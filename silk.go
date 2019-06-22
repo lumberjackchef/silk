@@ -66,17 +66,7 @@ func main() {
 			Action:  cmd.PrintOrChangeVersion,
 		},
 		cmd.Add(),
-		{
-			Name:  "commit",
-			Usage: "Tags the current commit buffer and resets all file statuses",
-			Action: func(c *cli.Context) error {
-				// TODO: add commit buffer to some sort of hash function
-				// TODO: return as a commit hash of some kind when committing
-				// TODO: add commit message ability
-				helper.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
-				return nil
-			},
-		},
+		cmd.Commit(),
 	}
 
 	err := app.Run(os.Args)
