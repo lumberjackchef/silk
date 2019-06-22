@@ -34,29 +34,7 @@ func main() {
 			Name:    "status",
 			Aliases: []string{"s"},
 			Usage:   "Get the status of the current project and/or component.",
-			Action: func(c *cli.Context) error {
-				helper.CommandAction(
-					func() {
-						// Print status
-						fmt.Printf("\t%s "+cmd.SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
-
-						if helper.IsComponentOrRoot() == "component" {
-							os.Chdir(cmd.SilkComponentRoot())
-						} else {
-							os.Chdir(cmd.SilkRoot())
-						}
-
-						currentWorkingDirectory, _ := os.Getwd()
-
-						// File list
-						files := cmd.ComposeFileList(currentWorkingDirectory)
-
-						// Print the file status
-						cmd.ListFilesInCommitBuffer(files)
-					},
-				)
-				return nil
-			},
+			Action:  cmd.StatusCommand,
 		},
 		{
 			Name:  "clone",
