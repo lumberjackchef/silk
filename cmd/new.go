@@ -14,6 +14,9 @@ import (
 	"github.com/urfave/cli"
 )
 
+// TODO: Create initial commit buffer
+// TODO: Determine how to save/record project & component meta info silently (pass to remote & down to local, etc)
+
 // New creates a new silk project
 func New() cli.Command {
 	return cli.Command{
@@ -84,5 +87,3 @@ func New() cli.Command {
 		},
 	}
 }
-
-// CreateNewProject creates new project if arg provided & not already a project, errors if not

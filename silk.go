@@ -15,6 +15,8 @@ func main() {
 	app.Usage = "A modern version control paradigm for service oriented architectures."
 
 	// Allows for bash completion of commands & subcommands
+	// Requires file additions & other changes to fully implement
+	// TODO: add system file edits & additions to enable full bash completion out of the gate
 	app.EnableBashCompletion = true
 
 	app.Commands = []cli.Command{
