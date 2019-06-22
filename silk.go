@@ -21,19 +21,7 @@ func main() {
 		cmd.New(),
 		cmd.Status(),
 		cmd.Clone(),
-		{
-			Name:    "component",
-			Aliases: []string{"c"},
-			Usage:   "If no arguments, lists all components in the current project. If a name is supplied, this will either move to the component, clone from remote & move to the component, or it will create a new component of name [name]",
-			Action:  cmd.ComponentCommand,
-			Subcommands: []cli.Command{
-				{
-					Name:   "remove",
-					Usage:  "remove an existing component",
-					Action: cmd.RemoveComponent,
-				},
-			},
-		},
+		cmd.Component(),
 		cmd.Version(),
 		cmd.Add(),
 		cmd.Commit(),
