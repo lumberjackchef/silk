@@ -11,43 +11,50 @@ import (
 	"github.com/urfave/cli"
 )
 
-// PrintOrChangeVersion ...
-func PrintOrChangeVersion(c *cli.Context) error {
-	helper.CommandAction(func() {
-		// Colors setup
-		cNotice := color.New(color.FgGreen).SprintFunc()
+// Version lists or edits the current version of the project
+func Version() cli.Command {
+	return cli.Command{
+		Name:    "version",
+		Aliases: []string{"v"},
+		Usage:   "Lists or edits the current version of the project",
+		Action: func(c *cli.Context) error {
+			helper.CommandAction(func() {
+				// Colors setup
+				cNotice := color.New(color.FgGreen).SprintFunc()
 
-		var metaData helper.ProjectMeta
+				var metaData helper.ProjectMeta
 
-		// Open, check, & defer closing of the meta data file
-		metaFile, metaFileErr := os.Open(helper.SilkRoot() + "/.silk/meta.json")
-		helper.Check(metaFileErr)
-		defer metaFile.Close()
+				// Open, check, & defer closing of the meta data file
+				metaFile, metaFileErr := os.Open(helper.SilkRoot() + "/.silk/meta.json")
+				helper.Check(metaFileErr)
+				defer metaFile.Close()
 
-		// Get the []byte version of the json data
-		byteValue, byteValueErr := ioutil.ReadAll(metaFile)
-		helper.Check(byteValueErr)
+				// Get the []byte version of the json data
+				byteValue, byteValueErr := ioutil.ReadAll(metaFile)
+				helper.Check(byteValueErr)
 
-		// Transform the []byte data into usable struct data
-		metaDataErr := json.Unmarshal(byteValue, &metaData)
-		helper.Check(metaDataErr)
+				// Transform the []byte data into usable struct data
+				metaDataErr := json.Unmarshal(byteValue, &metaData)
+				helper.Check(metaDataErr)
 
-		if c.NArg() > 0 {
-			// Change the version & transform back to actual json
-			metaData.Version = fmt.Sprintf(c.Args().Get(0))
-			metaDataJSON, metaDataJSONErr := json.MarshalIndent(metaData, "", " ")
-			helper.Check(metaDataJSONErr)
+				if c.NArg() > 0 {
+					// Change the version & transform back to actual json
+					metaData.Version = fmt.Sprintf(c.Args().Get(0))
+					metaDataJSON, metaDataJSONErr := json.MarshalIndent(metaData, "", " ")
+					helper.Check(metaDataJSONErr)
 
-			// Write the version change to the file
-			metaFileWriteErr := ioutil.WriteFile(helper.SilkRoot()+"/.silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
-			helper.Check(metaFileWriteErr)
+					// Write the version change to the file
+					metaFileWriteErr := ioutil.WriteFile(helper.SilkRoot()+"/.silk/meta.json", []byte(string(metaDataJSON)+"\n"), 0766)
+					helper.Check(metaFileWriteErr)
 
-			// Confirmation message
-			fmt.Println("\tVersion successfully updated to " + cNotice(metaData.Version) + "!")
-		} else {
-			// If the user just wants to check the version and not change it
-			fmt.Println("\t" + cNotice(metaData.Version))
-		}
-	})
-	return nil
+					// Confirmation message
+					fmt.Println("\tVersion successfully updated to " + cNotice(metaData.Version) + "!")
+				} else {
+					// If the user just wants to check the version and not change it
+					fmt.Println("\t" + cNotice(metaData.Version))
+				}
+			})
+			return nil
+		},
+	}
 }

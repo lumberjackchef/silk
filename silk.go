@@ -34,12 +34,7 @@ func main() {
 				},
 			},
 		},
-		{
-			Name:    "version",
-			Aliases: []string{"v"},
-			Usage:   "Lists or edits the current version of the project",
-			Action:  cmd.PrintOrChangeVersion,
-		},
+		cmd.Version(),
 		cmd.Add(),
 		cmd.Commit(),
 	}
