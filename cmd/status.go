@@ -9,27 +9,34 @@ import (
 	"github.com/urfave/cli"
 )
 
-// StatusCommand returns the status of the current commit buffer
-func StatusCommand(c *cli.Context) error {
-	helper.CommandAction(func() {
-		cNotice := color.New(color.FgGreen).SprintFunc()
+// Status shows the state of the current project or component
+func Status() cli.Command {
+	return cli.Command{
+		Name:    "status",
+		Aliases: []string{"s"},
+		Usage:   "Get the status of the current project and/or component.",
+		Action: func(c *cli.Context) error {
+			helper.CommandAction(func() {
+				cNotice := color.New(color.FgGreen).SprintFunc()
 
-		// Print status
-		fmt.Printf("\t%s "+helper.SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
+				// Print status
+				fmt.Printf("\t%s "+helper.SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
 
-		if helper.IsComponentOrRoot() == "component" {
-			os.Chdir(helper.SilkComponentRoot())
-		} else {
-			os.Chdir(helper.SilkRoot())
-		}
+				if helper.IsComponentOrRoot() == "component" {
+					os.Chdir(helper.SilkComponentRoot())
+				} else {
+					os.Chdir(helper.SilkRoot())
+				}
 
-		currentWorkingDirectory, _ := os.Getwd()
+				currentWorkingDirectory, _ := os.Getwd()
 
-		// File list
-		files := helper.ComposeFileList(currentWorkingDirectory)
+				// File list
+				files := helper.ComposeFileList(currentWorkingDirectory)
 
-		// Print the file status
-		helper.ListFilesInCommitBuffer(files)
-	})
-	return nil
+				// Print the file status
+				helper.ListFilesInCommitBuffer(files)
+			})
+			return nil
+		},
+	}
 }

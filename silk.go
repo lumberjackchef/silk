@@ -18,15 +18,8 @@ func main() {
 	app.EnableBashCompletion = true
 
 	app.Commands = []cli.Command{
-		// TODO: redo this so that cmd.New, etc returns all this in one line
-		// 			 these should be named like the command line args (cmd.New, cmd.Status, etc)
 		cmd.New(),
-		{
-			Name:    "status",
-			Aliases: []string{"s"},
-			Usage:   "Get the status of the current project and/or component.",
-			Action:  cmd.StatusCommand,
-		},
+		cmd.Status(),
 		cmd.Clone(),
 		{
 			Name:    "component",
