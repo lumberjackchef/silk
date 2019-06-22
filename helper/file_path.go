@@ -41,6 +41,17 @@ func IsComponentOrRoot() string {
 	return partType
 }
 
+// SilkComponentRoot returns the component root directory path
+func SilkComponentRoot() string {
+	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
+	Check(currentWorkingDirectoryErr)
+
+	returnPath, walkUpErr := walkUp(currentWorkingDirectory, ".silk-component")
+	Check(walkUpErr)
+
+	return returnPath
+}
+
 // CheckWalkUp is a separate function solely for recursion
 func CheckWalkUp(currentPath string) (string, error) {
 	readCurrentPath, readCurrentPathErr := os.Open(currentPath)

@@ -15,6 +15,21 @@ type ProjectMeta struct {
 	ProjectURL  string `json:"url"`
 }
 
+// ComponentList .silk/components.json file structure
+type ComponentList struct {
+	ProjectName   string   `json:"project_name"`
+	ComponentList []string `json:"component_list"`
+}
+
+// ComponentMeta .silk/../{component}/.silk-component/meta.json file structure
+type ComponentMeta struct {
+	ProjectName   string `json:"project_name"`
+	ComponentName string `json:"component_name"`
+	InitDate      string `json:"init_date"`
+	Version       string `json:"version"`
+	Description   string `json:"description"`
+}
+
 // SilkMetaFile provides project metadata in an easy to consume format
 func SilkMetaFile() ProjectMeta {
 	var fileData ProjectMeta

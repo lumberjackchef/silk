@@ -10,32 +10,6 @@ import (
 	"github.com/fatih/color"
 )
 
-// ComponentList .silk/components.json file structure
-type ComponentList struct {
-	ProjectName   string   `json:"project_name"`
-	ComponentList []string `json:"component_list"`
-}
-
-// ComponentMeta .silk/../{component}/.silk-component/meta.json file structure
-type ComponentMeta struct {
-	ProjectName   string `json:"project_name"`
-	ComponentName string `json:"component_name"`
-	InitDate      string `json:"init_date"`
-	Version       string `json:"version"`
-	Description   string `json:"description"`
-}
-
-// SilkComponentRoot returns the component root directory path
-func SilkComponentRoot() string {
-	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
-	Check(currentWorkingDirectoryErr)
-
-	returnPath, walkUpErr := walkUp(currentWorkingDirectory, ".silk-component")
-	Check(walkUpErr)
-
-	return returnPath
-}
-
 // AddToSilkComponentList adds componentName to the list of components in .silk/components.json
 func AddToSilkComponentList(componentName string) error {
 	var componentFileData ComponentList
@@ -101,4 +75,24 @@ func CreateComponentsListFile(componentName string, componentConfigDirectory str
 	} else {
 		fmt.Printf("\t%s component %s already exists!\n", cWarning("Warning:"), cBold(componentName))
 	}
+}
+
+// GetComponentIndex returns a slice that lists all the components in .silk/components.json
+func GetComponentIndex() []string {
+	var componentFileData ComponentList
+
+	// Open, Check, & defer closing of the component list file
+	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
+	Check(componentJSONFileErr)
+	defer componentJSONFile.Close()
+
+	// Get the []byte version of the json data
+	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
+	Check(componentByteValueErr)
+
+	// Transform the []byte data into usable struct data
+	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
+	Check(componentJSONDataErr)
+
+	return componentFileData.ComponentList
 }
