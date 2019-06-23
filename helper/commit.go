@@ -34,8 +34,10 @@ func CreateInitialCommitBuffer() {
 		defer bufferFile.Close()
 
 		scanner := bufio.NewScanner(bufferFile)
-		line := 1
+		line := 0
 		for scanner.Scan() {
+			line = line + 1
+
 			fileChange := FileChange{
 				FileName:   file,
 				LineNumber: line,
@@ -43,7 +45,6 @@ func CreateInitialCommitBuffer() {
 			}
 
 			allFileChanges = append(allFileChanges, fileChange)
-			line++
 		}
 	}
 
@@ -68,12 +69,10 @@ func FilesInCommitBuffer() []string {
 	changes := CommitBufferFile().Changes
 
 	for _, change := range changes {
-		for _, file := range files {
-			if file != change.FileName {
-				files = append(files, change.FileName)
-			}
-		}
+		files = append(files, change.FileName)
 	}
+
+	files = uniqueNonEmptyElementsOf(files)
 
 	return files
 }

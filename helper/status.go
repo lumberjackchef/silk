@@ -2,7 +2,6 @@ package helper
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,19 +23,6 @@ func CustomExclusionList() []string {
 	}
 
 	return exclusionList
-}
-
-// ListFilesInCommitBuffer lists all files in the project in the commit buffer
-func ListFilesInCommitBuffer(files []string) {
-	// TODO: needs to be updated in some way to indicate status of being in the current buffer
-	// AWAITING: creation of a commit buffer
-	for index, file := range files {
-		fmt.Println("\t\t" + file)
-
-		if index == len(files)-1 {
-			fmt.Print("\n")
-		}
-	}
 }
 
 // ListAllFiles returns an array of file names based on project root

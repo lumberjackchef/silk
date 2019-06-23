@@ -21,11 +21,17 @@ func Status() cli.Command {
 				// Print status
 				fmt.Printf("\t%s "+helper.SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
 
-				// File list
-				files := helper.ListAllFiles()
+				// Print all file names in the commit buffer
+				files := helper.FilesInCommitBuffer()
+				for index, file := range files {
+					fmt.Println("\t\t" + cNotice(file))
 
-				// Print the file status
-				helper.ListFilesInCommitBuffer(files)
+					if index == len(files)-1 {
+						fmt.Print("\n")
+					}
+				}
+
+				// TODO: Print files with changes that are _not_ in the commit buffer
 			})
 			return nil
 		},
