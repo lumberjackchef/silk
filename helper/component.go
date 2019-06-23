@@ -10,6 +10,31 @@ import (
 	"github.com/fatih/color"
 )
 
+/*
+Components List
+*/
+
+// CreateComponentList creates the root project components list
+func CreateComponentList(projectName string) {
+	// Create a blank components list file
+	componentsList, componentsListErr := os.Create(RootDirectoryName + "/components.json")
+	Check(componentsListErr)
+	defer componentsList.Close()
+
+	// Creates the components data & writes to the file
+	componentsListData, _ := json.MarshalIndent(
+		&ComponentList{
+			ProjectName:   projectName,
+			ComponentList: []string{},
+		},
+		"",
+		"  ",
+	)
+
+	_, componentsListWriteError := componentsList.WriteString(string(componentsListData) + "\n")
+	Check(componentsListWriteError)
+}
+
 // AddToSilkComponentList adds componentName to the list of components in .silk/components.json
 func AddToSilkComponentList(componentName string) error {
 	var componentFileData ComponentList
@@ -39,8 +64,12 @@ func AddToSilkComponentList(componentName string) error {
 	return nil
 }
 
-// CreateComponentsListFile creates {silk root}/components.json file
-func CreateComponentsListFile(componentName string, componentConfigDirectory string) {
+/*
+Component Meta Data
+*/
+
+// CreateComponentMetaFile creates {silk component root}/.silk-component/meta.json file
+func CreateComponentMetaFile(componentName string, componentConfigDirectory string) {
 	// Colors setup
 	cWarning := color.New(color.FgYellow).SprintFunc()
 	cBold := color.New(color.Bold).SprintFunc()
@@ -77,8 +106,12 @@ func CreateComponentsListFile(componentName string, componentConfigDirectory str
 	}
 }
 
-// GetComponentIndex returns a slice that lists all the components in .silk/components.json
-func GetComponentIndex() []string {
+/*
+Component Index
+*/
+
+// ComponentIndex returns a slice that lists all the components in .silk/components.json
+func ComponentIndex() []string {
 	var componentFileData ComponentList
 
 	// Open, Check, & defer closing of the component list file

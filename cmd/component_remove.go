@@ -12,8 +12,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-// ComponentRemove removes the component from the Components List (obvi)
-func ComponentRemove() cli.Command {
+// RemoveComponent removes the component from the Components List (obvi)
+func RemoveComponent() cli.Command {
 	return cli.Command{
 		Name:  "remove",
 		Usage: "remove an existing component",

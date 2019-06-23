@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/lumberjackchef/silk/helper"
 	"github.com/urfave/cli"
 )
+
+// TODO: Change new component command to `$ silk component new {name}`?
 
 // Component either lists the component index or creates a new component if an arg is provided
 func Component() cli.Command {
@@ -20,28 +21,21 @@ func Component() cli.Command {
 				cWarning := color.New(color.FgYellow).SprintFunc()
 				cNotice := color.New(color.FgGreen).SprintFunc()
 
-				if c.NArg() > 0 {
-					// Parameterized & lower-cased version of the user input string
-					componentName := fmt.Sprintf(strings.Join(strings.Split(strings.ToLower(c.Args().Get(0)), " "), "-"))
-					componentConfigDirectory := helper.SilkRoot() + "/" + componentName + "/.silk-component"
-
-					helper.CreateComponentsListFile(componentName, componentConfigDirectory)
-				} else {
-					// Lists index of components
-					if len(helper.GetComponentIndex()) > 0 {
-						fmt.Println(cNotice("\tComponents in project " + helper.SilkMetaFile().ProjectName + ":"))
-						for _, component := range helper.GetComponentIndex() {
-							fmt.Println("\t\t" + component)
-						}
-					} else {
-						fmt.Printf("\t%s There are no components in the current project.\n", cWarning("Warning:"))
+				// Lists index of components
+				if len(helper.ComponentIndex()) > 0 {
+					fmt.Println(cNotice("\tComponents in project " + helper.SilkMetaFile().ProjectName + ":"))
+					for _, component := range helper.ComponentIndex() {
+						fmt.Println("\t\t" + component)
 					}
+				} else {
+					fmt.Printf("\t%s There are no components in the current project.\n", cWarning("Warning:"))
 				}
 			})
 			return nil
 		},
 		Subcommands: []cli.Command{
-			ComponentRemove(),
+			NewComponent(),
+			RemoveComponent(),
 		},
 	}
 }
