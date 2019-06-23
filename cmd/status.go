@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/fatih/color"
 	"github.com/lumberjackchef/silk/helper"
@@ -22,16 +21,8 @@ func Status() cli.Command {
 				// Print status
 				fmt.Printf("\t%s "+helper.SilkMetaFile().ProjectName+"\n\n", cNotice("Project:"))
 
-				if helper.IsComponentOrRoot() == "component" {
-					os.Chdir(helper.SilkComponentRoot())
-				} else {
-					os.Chdir(helper.SilkRoot())
-				}
-
-				currentWorkingDirectory, _ := os.Getwd()
-
 				// File list
-				files := helper.ListAllFiles(currentWorkingDirectory)
+				files := helper.ListAllFiles()
 
 				// Print the file status
 				helper.ListFilesInCommitBuffer(files)

@@ -24,7 +24,7 @@ type RootCommitBuffer struct {
 // FileChange structure for a single file change
 type FileChange struct {
 	FileName   string `json:"file_name"`
-	LineNumber string `json:"line_number"`
+	LineNumber int    `json:"line_number"`
 	Text       string `json:"text"`
 }
 
@@ -83,4 +83,25 @@ func ComponentMetaFile() ComponentMeta {
 	Check(jsonDataErr)
 
 	return fileData
+}
+
+// CommitBufferFile provides commit buffer data in an easy to consume format
+func CommitBufferFile() RootCommitBuffer {
+	// TODO: update to be useable for root or a component
+	var bufferData RootCommitBuffer
+
+	// Open, check, & defer closing of the meta data file
+	jsonFile, jsonFileErr := os.Open(SilkRoot() + RootDirectoryName + "/commit/buffer")
+	Check(jsonFileErr)
+	defer jsonFile.Close()
+
+	// Get the []byte version of the json data
+	byteValue, byteValueErr := ioutil.ReadAll(jsonFile)
+	Check(byteValueErr)
+
+	// Transform the []byte data into usable struct data
+	jsonDataErr := json.Unmarshal(byteValue, &bufferData)
+	Check(jsonDataErr)
+
+	return bufferData
 }

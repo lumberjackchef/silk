@@ -40,10 +40,16 @@ func ListFilesInCommitBuffer(files []string) {
 }
 
 // ListAllFiles returns an array of file names based on project root
-func ListAllFiles(currentWorkingDirectory string) []string {
+func ListAllFiles() []string {
 	var files []string
 
-	// TODO: Determine how to include dotfiles
+	if IsComponentOrRoot() == "component" {
+		os.Chdir(SilkComponentRoot())
+	} else {
+		os.Chdir(SilkRoot())
+	}
+
+	currentWorkingDirectory, _ := os.Getwd()
 
 	err := filepath.Walk(currentWorkingDirectory, func(path string, info os.FileInfo, err error) error {
 		// Ignore non-project related files
