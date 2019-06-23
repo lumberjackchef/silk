@@ -39,6 +39,7 @@ func New() cli.Command {
 						// Create relevant project files
 						helper.CreateRootMetaFile(projectName)
 						helper.CreateComponentList(projectName)
+						helper.CreateInitialCommitBuffer()
 
 						// Confirmation message
 						fmt.Println("\tNew project " + cNotice(fmt.Sprintf(c.Args().Get(0))) + " created!")

@@ -15,6 +15,19 @@ type ProjectMeta struct {
 	ProjectURL  string `json:"url"`
 }
 
+// RootCommitBuffer ...
+type RootCommitBuffer struct {
+	ProjectName string       `json:"project_name"`
+	Changes     []FileChange `json:"changes"`
+}
+
+// FileChange structure for a single file change
+type FileChange struct {
+	FileName   string `json:"file_name"`
+	LineNumber string `json:"line_number"`
+	Text       string `json:"text"`
+}
+
 // ComponentList .silk/components.json file structure
 type ComponentList struct {
 	ProjectName   string   `json:"project_name"`
@@ -36,6 +49,28 @@ func SilkMetaFile() ProjectMeta {
 
 	// Open, check, & defer closing of the meta data file
 	jsonFile, jsonFileErr := os.Open(SilkRoot() + "/.silk/meta.json")
+	Check(jsonFileErr)
+	defer jsonFile.Close()
+
+	// Get the []byte version of the json data
+	byteValue, byteValueErr := ioutil.ReadAll(jsonFile)
+	Check(byteValueErr)
+
+	// Transform the []byte data into usable struct data
+	jsonDataErr := json.Unmarshal(byteValue, &fileData)
+	Check(jsonDataErr)
+
+	return fileData
+}
+
+// This is currently not in use
+
+// ComponentMetaFile provides component metadata in an easy to consume format
+func ComponentMetaFile() ComponentMeta {
+	var fileData ComponentMeta
+
+	// Open, check, & defer closing of the meta data file
+	jsonFile, jsonFileErr := os.Open(SilkComponentRoot() + "/.silk-component/meta.json")
 	Check(jsonFileErr)
 	defer jsonFile.Close()
 

@@ -31,7 +31,7 @@ func Status() cli.Command {
 				currentWorkingDirectory, _ := os.Getwd()
 
 				// File list
-				files := helper.ComposeFileList(currentWorkingDirectory)
+				files := helper.ListAllFiles(currentWorkingDirectory)
 
 				// Print the file status
 				helper.ListFilesInCommitBuffer(files)
