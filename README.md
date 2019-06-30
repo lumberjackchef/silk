@@ -1,7 +1,8 @@
 <!-- ![](logo.png) -->
 
 # Silk
-================================================
+
+* * *
 
 A Modern VCS for Multi-Component Projects
 
