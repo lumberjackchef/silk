@@ -86,7 +86,6 @@ func ChangesNotInCommitBuffer() []FileChange {
 
 	allFileChanges = append(allFileChanges, LatestCommit().Changes...)
 	allFileChanges = append(allFileChanges, CommitBuffer().Changes...)
-	// NOTE: see uniqueNonEmptyElementsOf to figure out how to remove anything that has a duplicate
 
 	unique := make(map[FileChange]bool)
 	returnSlice := []FileChange{}
@@ -101,7 +100,7 @@ func ChangesNotInCommitBuffer() []FileChange {
 					index = i
 				}
 			}
-			returnSlice[len(returnSlice)-1], returnSlice[index] = returnSlice[index], returnSlice[len(returnSlice)-1]
+			returnSlice[index] = returnSlice[len(returnSlice)-1]
 			returnSlice = returnSlice[:len(returnSlice)-1]
 		}
 	}
