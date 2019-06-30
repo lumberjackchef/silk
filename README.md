@@ -4,7 +4,7 @@
 
 * * *
 
-A Modern VCS for Multi-Component Projects
+A modern Source Code Management tool for multi-component software projects
 
 * * *
 
