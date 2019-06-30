@@ -1,5 +1,6 @@
 # Silk Philosophies
 
+NOTE: THIS IS A WORK IN PROGRESS
 This is a write up of the coding philosophies behind Silk.  
 These are guidelines for how to best write code within this project.
 
@@ -10,3 +11,4 @@ These are guidelines for how to best write code within this project.
 * Follow SOLID principles
 * Favor function composition that is easy to understand
 * Function names should be self-documenting
+* Good testing practices save us time and sanity  
