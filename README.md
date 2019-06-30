@@ -9,7 +9,7 @@ A modern Source Code Management tool for multi-component software projects
 * * *
 
 **WARNING**: THIS PROJECT IS STILL IN THE EXPERIMENTAL PHASE.  
-Silk is a version control system for multi-software architectures. It provides a single project source to track, build, test, & deploy services architecture & component architecture products/projects.
+Silk is a source code management system for multi-software architectures. It provides a single project source to track, build, test, & deploy services architecture & component architecture products/projects.
 
 ## List of key features
 
