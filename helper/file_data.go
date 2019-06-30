@@ -85,13 +85,13 @@ func ComponentMetaFile() ComponentMeta {
 	return fileData
 }
 
-// CommitBufferFile provides commit buffer data in an easy to consume format
-func CommitBufferFile() RootCommitBuffer {
+// CommitBuffer provides commit buffer data in an easy to consume format
+func CommitBuffer() RootCommitBuffer {
 	// TODO: update to be useable for root or a component
 	var bufferData RootCommitBuffer
 
 	// Open, check, & defer closing of the meta data file
-	jsonFile, jsonFileErr := os.Open(SilkRoot() + RootDirectoryName + "/commit/buffer")
+	jsonFile, jsonFileErr := os.Open(SilkRoot() + "/" + RootDirectoryName + "/commit/buffer")
 	Check(jsonFileErr)
 	defer jsonFile.Close()
 
@@ -104,4 +104,28 @@ func CommitBufferFile() RootCommitBuffer {
 	Check(jsonDataErr)
 
 	return bufferData
+}
+
+// LatestCommit provides latest commit data in an easy to consume format
+func LatestCommit() RootCommitBuffer {
+	latestCommit := RootDirectoryName + "/commit/latest"
+	if _, err := os.Stat(latestCommit); !os.IsNotExist(err) {
+		var bufferData RootCommitBuffer
+
+		// Open, check, & defer closing of the meta data file
+		jsonFile, jsonFileErr := os.Open(SilkRoot() + "/" + latestCommit)
+		Check(jsonFileErr)
+		defer jsonFile.Close()
+
+		// Get the []byte version of the json data
+		byteValue, byteValueErr := ioutil.ReadAll(jsonFile)
+		Check(byteValueErr)
+
+		// Transform the []byte data into usable struct data
+		jsonDataErr := json.Unmarshal(byteValue, &bufferData)
+		Check(jsonDataErr)
+
+		return bufferData
+	}
+	return RootCommitBuffer{}
 }

@@ -11,6 +11,7 @@ import (
 func CustomExclusionList() []string {
 	var exclusionList []string
 
+	// TODO: Fix this to be component/root agnostic
 	if _, err := os.Stat(SilkRoot() + "/.silk-ignore"); !os.IsNotExist(err) {
 		ignoreFile, ignoreFileErr := os.Open(SilkRoot() + "/.silk-ignore")
 		Check(ignoreFileErr)
@@ -25,40 +26,48 @@ func CustomExclusionList() []string {
 	return exclusionList
 }
 
+// IsNotExcluded takes a path & returns a boolean showing whether a file is excluded or not
+func IsNotExcluded(path string, info os.FileInfo) bool {
+	IsNotExcluded := true
+	IsNotGit := !strings.Contains(filepath.Dir(path), ".git")
+	IsNotSilkFiles := !strings.Contains(filepath.Dir(path), ".silk")
+	PrimaryNotExcluded := IsNotGit && IsNotSilkFiles && !info.IsDir()
+
+	if PrimaryNotExcluded {
+		for _, matchPattern := range CustomExclusionList() {
+			if IsNotExcluded {
+				// NOTE: May need to fix this to be more specific
+				// 			 This may exclude intentionally added files
+				// 			 Need to support match types somehow
+				// 			 Take a look at .gitignore patterns and see what we can glean from that
+				IsNotExcluded = !strings.Contains(path, matchPattern)
+			} else {
+				break
+			}
+		}
+	} else {
+		IsNotExcluded = false
+	}
+
+	return IsNotExcluded
+}
+
 // ListAllFiles returns an array of file names based on project root
 func ListAllFiles() []string {
 	var files []string
 
-	if IsComponentOrRoot() == "component" {
-		os.Chdir(SilkComponentRoot())
-	} else {
-		os.Chdir(SilkRoot())
-	}
+	// TODO: Fix this to be component/root agnostic
+	// if IsComponentOrRoot() == "component" {
+	// 	os.Chdir(SilkComponentRoot())
+	// } else {
+	os.Chdir(SilkRoot())
+	// }
 
 	currentWorkingDirectory, _ := os.Getwd()
 
+	// TODO: Fix this to be component/root agnostic
 	err := filepath.Walk(currentWorkingDirectory, func(path string, info os.FileInfo, err error) error {
-		// Ignore non-project related files
-		IsNotExcluded := true
-		IsNotGit := !strings.Contains(filepath.Dir(path), ".git")
-		IsNotSilkFiles := !strings.Contains(filepath.Dir(path), ".silk")
-		DoesNotContainDotPath := IsNotGit && IsNotSilkFiles
-
-		if DoesNotContainDotPath {
-			for _, matchPattern := range CustomExclusionList() {
-				if IsNotExcluded {
-					// NOTE: May need to fix this to be more specific
-					// 			 This may exclude intentionally added files
-					// 			 Need to support match types somehow
-					// 			 Take a look at .gitignore patterns and see what we can glean from that
-					IsNotExcluded = !strings.Contains(path, matchPattern)
-				} else {
-					break
-				}
-			}
-		}
-
-		if !info.IsDir() && DoesNotContainDotPath && IsNotExcluded {
+		if IsNotExcluded(path, info) {
 			files = append(files, strings.Replace(path, SilkRoot()+"/", "", 1))
 		}
 		return nil
