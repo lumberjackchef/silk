@@ -55,20 +55,17 @@ func IsNotExcluded(path string, info os.FileInfo) bool {
 // ListAllFiles returns an array of file names based on project root
 func ListAllFiles() []string {
 	var files []string
+	var currentWorkingDirectory string
 
-	// TODO: Fix this to be component/root agnostic
-	// if IsComponentOrRoot() == "component" {
-	// 	os.Chdir(SilkComponentRoot())
-	// } else {
-	os.Chdir(SilkRoot())
-	// }
+	if IsComponentOrRoot() == "component" {
+		currentWorkingDirectory = SilkComponentRoot()
+	} else {
+		currentWorkingDirectory = SilkRoot()
+	}
 
-	currentWorkingDirectory, _ := os.Getwd()
-
-	// TODO: Fix this to be component/root agnostic
 	err := filepath.Walk(currentWorkingDirectory, func(path string, info os.FileInfo, err error) error {
 		if IsNotExcluded(path, info) {
-			files = append(files, strings.Replace(path, SilkRoot()+"/", "", 1))
+			files = append(files, strings.Replace(path, currentWorkingDirectory+"/", "", 1))
 		}
 		return nil
 	})
