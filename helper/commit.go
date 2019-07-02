@@ -150,10 +150,17 @@ func FilesInCommitBuffer() []string {
 // FilesNotInCommitBuffer returns a list of files that are not currently in the commit buffer
 func FilesNotInCommitBuffer() []string {
 	var files []string
+	var filePath string
 	addFile := true
 	index := 1
-	// TODO: make this component/root agnostic
-	err := filepath.Walk(SilkRoot(), func(path string, info os.FileInfo, err error) error {
+
+	if IsComponentOrRoot() == "component" {
+		filePath = SilkComponentRoot()
+	} else if IsComponentOrRoot() == "root" {
+		filePath = SilkRoot()
+	}
+
+	err := filepath.Walk(filePath, func(path string, info os.FileInfo, err error) error {
 		// first, find all files not currently in the commit buffer at all
 		fileName := strings.Replace(path, SilkRoot()+"/", "", 1)
 
