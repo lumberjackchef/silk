@@ -16,13 +16,8 @@ func Add() cli.Command {
 		Name:  "add",
 		Usage: "Adds a file or files to the current commit buffer",
 		Action: func(c *cli.Context) error {
-			// TODO: Add a list of changes to files to a commit buffer
-			// Check if the root commit exists/check for latest commit
-			// diff whole files first to eliminate unchanged files
-			// diff changed files line by line
-			// add changes to a commit buffer file
-			// should be file name, line number, & actual code changes
 			// TODO: add interactive addition for multifile additions
+			// TODO: add simple, single file/folder change additions to the commit buffer
 			helper.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 			return nil
 		},

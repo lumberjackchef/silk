@@ -15,12 +15,10 @@ func main() {
 	app.Usage = "A modern version control paradigm for service oriented architectures."
 
 	// Allows for bash completion of commands & subcommands
-	// Requires file additions & other changes to fully implement
 	// TODO: add system file edits & additions to enable full bash completion out of the gate
 	app.EnableBashCompletion = true
 
-	// TODO: rewrite this to search CMD package for command names instead of manually adding them here (extensibility)
-	// also find a way to add extensions without requiring the user to install go or rebuild or anything
+	// TODO: find a way to add extensions without requiring the user to install go or rebuild or anything
 	app.Commands = []cli.Command{
 		cmd.New(),
 		cmd.Status(),

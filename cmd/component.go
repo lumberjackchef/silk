@@ -8,8 +8,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-// TODO: Change new component command to `$ silk component new {name}`?
-
 // Component either lists the component index or creates a new component if an arg is provided
 func Component() cli.Command {
 	return cli.Command{
