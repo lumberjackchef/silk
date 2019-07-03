@@ -21,13 +21,13 @@ func main() {
 	// TODO: find a way to add extensions without requiring the user to install go or rebuild or anything
 	app.Commands = []cli.Command{
 		cmd.New(),
-		cmd.Status(),
 		cmd.Clone(),
-		cmd.Component(),
-		cmd.Version(),
+		cmd.Status(),
 		cmd.Add(),
 		cmd.Remove(),
 		cmd.Commit(),
+		cmd.Component(),
+		cmd.Version(),
 	}
 
 	err := app.Run(os.Args)
