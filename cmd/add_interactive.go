@@ -15,7 +15,7 @@ func InteractiveAddition() cli.Command {
 	return cli.Command{
 		Name:    "interactive",
 		Aliases: []string{"i"},
-		Usage:   "Adds a large amount of changes to the current commit buffer via an interactive interface",
+		Usage:   "Adds/removes a large amount of changes to the current commit buffer via an interactive interface",
 		Action: func(c *cli.Context) error {
 			helper.CommandAction(func() { fmt.Printf("\t%s\n", cNotice("Coming Soon!")) })
 			return nil

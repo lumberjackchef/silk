@@ -26,6 +26,7 @@ func main() {
 		cmd.Component(),
 		cmd.Version(),
 		cmd.Add(),
+		cmd.Remove(),
 		cmd.Commit(),
 	}
 
