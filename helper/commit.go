@@ -89,19 +89,25 @@ func ChangesNotInCommitBuffer() []FileChange {
 
 	unique := make(map[FileChange]bool)
 	returnSlice := []FileChange{}
-	for _, change := range allFileChanges {
-		if !unique[change] {
-			returnSlice = append(returnSlice, change)
-			unique[change] = true
-		} else if unique[change] {
-			var index int
-			for i, value := range returnSlice {
-				if value == change {
-					index = i
+	if len(allFileChanges) > 0 {
+		for _, change := range allFileChanges {
+			if !unique[change] {
+				returnSlice = append(returnSlice, change)
+				unique[change] = true
+			} else if unique[change] {
+				var index int
+				var changed bool
+				for i, value := range returnSlice {
+					if value == change {
+						index = i
+						changed = true
+					}
+				}
+				if changed {
+					returnSlice[index] = returnSlice[len(returnSlice)-1]
+					returnSlice = returnSlice[:len(returnSlice)-1]
 				}
 			}
-			returnSlice[index] = returnSlice[len(returnSlice)-1]
-			returnSlice = returnSlice[:len(returnSlice)-1]
 		}
 	}
 	// 		// Append when:
