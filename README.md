@@ -34,6 +34,9 @@ $ silk s
 $ silk add my.file
 # adds the file my.file to the commit buffer
 
+$ silk add my/dir/
+# Coming Soon™
+
 $ silk add interactive
 $ silk add i
 # Coming Soon™
