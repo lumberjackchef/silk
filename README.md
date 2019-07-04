@@ -24,11 +24,25 @@ $ silk new my_project
 $ silk n my_project
 # creates a new silk project titled 'my_project'
 
+$ silk clone
+# Coming Soon™
+
 $ silk status
 $ silk s
 # gets the current status of the current project or component
 
-$ silk clone
+$ silk add my.file
+# adds the file my.file to the commit buffer
+
+$ silk add interactive
+$ silk add i
+# Coming Soon™
+
+$ silk remove my.file
+# Coming Soon™
+
+$ silk remove interactive
+$ silk remove i
 # Coming Soon™
 
 $ silk component
