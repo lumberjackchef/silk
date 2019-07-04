@@ -75,6 +75,11 @@ $ silk v "0.2.0"
 # Coming Soon™
 ```
 
+### About Components
+
+Components in Silk can be local within the core project repo, but they can also be imported from other projects.
+In addition, a project itself can also be imported as a component within another project.
+
 ### Contributing
 
 Keep it simple. Keep it minimal. Don't put every single feature just because you can.
