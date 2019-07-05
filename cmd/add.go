@@ -1,12 +1,10 @@
 package cmd
 
 import (
-	"bufio"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/fatih/color"
 	"github.com/lumberjackchef/silk/helper"
@@ -15,6 +13,7 @@ import (
 
 // Add allows for the addition of changes to the commit buffer
 func Add() cli.Command {
+	cNotice := color.New(color.FgGreen).SprintFunc()
 	cWarning := color.New(color.FgYellow).SprintFunc()
 
 	return cli.Command{
@@ -24,60 +23,62 @@ func Add() cli.Command {
 			helper.CommandAction(func() {
 				if c.NArg() > 0 {
 					var addIt bool
-					var commitBuffer helper.RootCommitBuffer
-					var changes []helper.FileChange
+					var isDir bool
 					fileName := fmt.Sprintf(c.Args().Get(0))
-					oldChanges := helper.CommitBuffer().Changes
 
-					for _, file := range helper.UnstagedFilesList() {
-						if fileName == file {
-							addIt = true
-						}
+					fi, err := os.Stat(fileName)
+					helper.Check(err)
+
+					if fi.Mode().IsDir() {
+						isDir = true
 					}
 
-					if addIt {
-						// TODO: currently this only works for a single file addition
-						// 			 update to accomodate for a whole directory of changes
-						bufferFile, err := os.Open(helper.SilkRoot() + "/" + helper.RootDirectoryName + "/commit/buffer")
-						helper.Check(err)
-						defer bufferFile.Close()
-
-						byteValue, err := ioutil.ReadAll(bufferFile)
-						helper.Check(err)
-
-						err = json.Unmarshal(byteValue, &commitBuffer)
-						helper.Check(err)
-
-						changedFile, err := os.Open(helper.SilkRoot() + "/" + fileName)
-						helper.Check(err)
-						defer changedFile.Close()
-
-						scanner := bufio.NewScanner(changedFile)
-						line := 0
-						for scanner.Scan() {
-							line = line + 1
-
-							fileChange := helper.FileChange{
-								FileName:   fileName,
-								LineNumber: line,
-								Text:       scanner.Text(),
+					if !isDir {
+						for _, file := range helper.UnstagedFilesList() {
+							if fileName == file {
+								addIt = true
 							}
-
-							changes = append(changes, fileChange)
 						}
-						changes = append(changes, oldChanges...)
-						commitBuffer.Changes = changes
+					}
+					if addIt && !isDir {
+						helper.AddFileToCommitBuffer(fileName)
+						fmt.Printf("\n\t%s added to the commit buffer!\n", cNotice(fileName))
+					} else if isDir {
+						var files []string
 
-						commitBufferJSON, err := json.MarshalIndent(commitBuffer, " ", "")
+						err := filepath.Walk(fileName, func(path string, info os.FileInfo, err error) error {
+							// TODO: need to get clean `path` with `SilkRoot()`
+							for _, file := range helper.UnstagedFilesList() {
+								if path == file {
+									// TODO: add the file to commit buffer
+									helper.AddFileToCommitBuffer(path)
+									files = append(files, path)
+								}
+							}
+							return nil
+						})
 						helper.Check(err)
 
-						err = ioutil.WriteFile(helper.SilkRoot()+"/.silk/commit/buffer", []byte(string(commitBufferJSON)+"\n"), 0766)
-						helper.Check(err)
-
-						fmt.Println("\n\tAdded new file!")
+						if len(files) > 0 {
+							fmt.Printf("\n\t Files added to the commit buffer: ")
+							// Print the names of the files added via `files`
+						} else {
+							fmt.Println("\n\t" + cWarning("Warning: ") + "no files with changes present\n")
+						}
 					} else {
-						// TODO: Print an error here
-						fmt.Println("File has already been added or does not exist!")
+						var inBuffer bool
+						// TODO: Log an error here
+						for _, file := range helper.FilesInCommitBuffer() {
+							if fileName == file {
+								inBuffer = true
+							}
+						}
+
+						if inBuffer {
+							fmt.Printf("\n\tFile(s) have already been addedto the commit buffer!\n\n")
+						} else {
+							fmt.Printf("\n\tNot a valid file\n\n")
+						}
 					}
 				} else {
 					err := errors.New("no files specified")
