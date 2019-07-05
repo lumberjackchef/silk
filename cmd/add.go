@@ -50,7 +50,6 @@ func Add() cli.Command {
 							// TODO: need to get clean `path` with `SilkRoot()`
 							for _, file := range helper.UnstagedFilesList() {
 								if path == file {
-									// TODO: add the file to commit buffer
 									helper.AddFileToCommitBuffer(path)
 									files = append(files, path)
 								}
@@ -60,8 +59,15 @@ func Add() cli.Command {
 						helper.Check(err)
 
 						if len(files) > 0 {
-							fmt.Printf("\n\t Files added to the commit buffer: ")
-							// Print the names of the files added via `files`
+							fmt.Printf("\n\tFiles added to the commit buffer: \n")
+
+							for index, file := range files {
+								fmt.Println("\t\t" + cNotice(file))
+
+								if index == len(files)-1 {
+									fmt.Print("\n")
+								}
+							}
 						} else {
 							fmt.Println("\n\t" + cWarning("Warning: ") + "no files with changes present\n")
 						}
