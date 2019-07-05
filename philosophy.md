@@ -12,3 +12,4 @@ These are guidelines for how to best write code within this project.
 * Favor function composition that is easy to understand
 * Function names should be self-documenting
 * Good testing practices save us time and sanity  
+* Errors should be helpful to the user  
