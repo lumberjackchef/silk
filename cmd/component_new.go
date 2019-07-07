@@ -8,7 +8,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-// NewComponent removes the component from the Components List (obvi)
+// NewComponent adds the component to the Components List (obvi)
 func NewComponent() cli.Command {
 	return cli.Command{
 		Name:  "new",

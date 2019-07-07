@@ -13,8 +13,6 @@ import (
 	"github.com/urfave/cli"
 )
 
-// TODO: add remove command
-
 // Remove allows for the addition of changes to the commit buffer
 func Remove() cli.Command {
 	// cNotice := color.New(color.FgGreen).SprintFunc()

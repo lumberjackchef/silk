@@ -104,7 +104,7 @@ func walkUp(currentPath string, directoryName string) (string, error) {
 
 	// Checks if we're at the root, returns an error if true
 	// TODO: Make sure this works with all filesystem types including containerized environments
-	// Mac: '/', Windows: 'C:\', Linux: '/', (Docker: '/'?)
+	// Mac: '/', Windows: 'C:\', Linux: '/', (Docker: '/'?): filepath.VolumeName(path)?
 	userRoot, userRootErr := filepath.Match("/", currentPath)
 	Check(userRootErr)
 

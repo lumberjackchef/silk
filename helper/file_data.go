@@ -88,7 +88,6 @@ func ComponentMetaFile() ComponentMeta {
 // CommitBuffer provides commit buffer data in an easy to consume format
 func CommitBuffer() RootCommitBuffer {
 	// TODO: update to be useable for root or a component
-	//  AWAITING creation of component intial commit buffer
 	var bufferData RootCommitBuffer
 
 	// Open, check, & defer closing of the meta data file
