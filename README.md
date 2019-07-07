@@ -17,6 +17,11 @@ Silk is a source code management system for multi-software architectures. It pro
 * Version control on a component-by-component basis
 * Coming Soon™: Interfaces to fake data for components
 
+### About Components
+
+Components in Silk can be local within the core project repo, but they can also be imported from other projects.
+In addition, a project itself can also be imported as a component within another project.
+
 ## Usage
 
 ```shell
@@ -35,14 +40,17 @@ $ silk add my.file
 # adds the file my.file to the commit buffer
 
 $ silk add my/dir/
-# Coming Soon™
+# Adds all files in the directory that have changes
 
 $ silk add interactive
 $ silk add i
 # Coming Soon™
 
 $ silk remove my.file
-# Coming Soon™
+# removes the file my.file from the commit buffer
+
+$ silk remove my/dir/
+# removes all files in the directory that are in the commit buffer
 
 $ silk remove interactive
 $ silk remove i
@@ -67,6 +75,18 @@ $ silk v
 $ silk version "0.2.0"
 $ silk v "0.2.0"
 # changes the version of the current project to 0.2.0
+
+$ silk log
+# Coming Soon™
+
+$ silk log 3
+# Comine Soon™
+
+$ silk log level
+# Coming Soon™
+
+$ silk log level debug
+# Coming Soon™
 ```
 
 ### Download & Installation
@@ -75,18 +95,16 @@ $ silk v "0.2.0"
 # Coming Soon™
 ```
 
-### About Components
-
-Components in Silk can be local within the core project repo, but they can also be imported from other projects.
-In addition, a project itself can also be imported as a component within another project.
+## Administrative Stuff
 
 ### Contributing
 
-Keep it simple. Keep it minimal. Don't put every single feature just because you can.
+Keep it simple. Keep it minimal. Don't put every single feature just because you can.  
+(Contribution Guide coming soon™)
 
 ### Authors or Acknowledgments
 
-* Ryan Pearson
+* [Ryan Pearson](https://twitter.com/LumberjackChef)
 
 ### License
 
