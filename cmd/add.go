@@ -26,6 +26,7 @@ func Add() cli.Command {
 					var isDir bool
 					fileName := fmt.Sprintf(c.Args().Get(0))
 
+					// TODO: make sure this is root/component relevant?
 					fi, err := os.Stat(fileName)
 					helper.Check(err)
 
@@ -40,6 +41,7 @@ func Add() cli.Command {
 							}
 						}
 					}
+
 					if addIt && !isDir {
 						helper.AddFileToCommitBuffer(fileName)
 						fmt.Printf("\n\t%s added to the commit buffer!\n", cNotice(fileName))
@@ -47,7 +49,6 @@ func Add() cli.Command {
 						var files []string
 
 						err := filepath.Walk(fileName, func(path string, info os.FileInfo, err error) error {
-							// TODO: need to get clean `path` with `SilkRoot()`
 							for _, file := range helper.UnstagedFilesList() {
 								if path == file {
 									helper.AddFileToCommitBuffer(path)

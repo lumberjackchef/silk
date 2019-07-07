@@ -82,7 +82,7 @@ func UnstagedFilesList() []string {
 	}
 
 	// Sanitizes the return to only have unique elements
-	files = uniqueNonEmptyElementsOf(files)
+	files = UniqueNonEmptyElementsOf(files)
 	return files
 }
 
@@ -97,7 +97,7 @@ func FilesInCommitBuffer() []string {
 	}
 
 	// Sanitizes the return to only have unique elements
-	files = uniqueNonEmptyElementsOf(files)
+	files = UniqueNonEmptyElementsOf(files)
 	return files
 }
 

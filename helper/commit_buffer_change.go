@@ -8,6 +8,7 @@ import (
 )
 
 // AddFileToCommitBuffer ...
+// TODO: update to work for file or directory
 func AddFileToCommitBuffer(fileName string) {
 	var commitBuffer RootCommitBuffer
 	var changes []FileChange
