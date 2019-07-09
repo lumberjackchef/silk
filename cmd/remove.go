@@ -82,7 +82,7 @@ func Remove() cli.Command {
 					// override oldChanges & add newChanges to buffer
 					commitBuffer.Changes = newChanges
 
-					commitBufferJSON, err := json.MarshalIndent(commitBuffer, " ", "")
+					commitBufferJSON, err := json.MarshalIndent(commitBuffer, "", "	")
 					helper.Check(err)
 
 					err = ioutil.WriteFile(helper.SilkRoot()+"/.silk/commit/buffer", []byte(string(commitBufferJSON)+"\n"), 0766)

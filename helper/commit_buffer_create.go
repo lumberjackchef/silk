@@ -50,7 +50,9 @@ func CreateInitialCommitBuffer() {
 		&RootCommitBuffer{
 			ProjectName: SilkMetaFile().ProjectName,
 			Changes:     allFileChanges,
-		}, "", "  ",
+		},
+		"",
+		"	",
 	)
 
 	_, commitBufferWriteErr := commitBuffer.WriteString(string(commitBufferData) + "\n")
