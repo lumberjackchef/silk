@@ -38,17 +38,26 @@ func RemoveComponent() cli.Command {
 
 						// remove the component from the components.json list
 						// open & read components file
-						componentsList, componentsListErr := os.Open(helper.SilkRoot() + "/.silk/components.json")
-						helper.Check(componentsListErr)
+						componentsList, err := os.Open(helper.SilkRoot() + "/.silk/components.json")
+						if err != nil {
+							fmt.Println(cWarning("\n\tError") + ": unable to open components list")
+							fmt.Print("\n")
+						}
 						defer componentsList.Close()
 
 						// get byte value of components file
-						byteValue, byteValueErr := ioutil.ReadAll(componentsList)
-						helper.Check(byteValueErr)
+						byteValue, err := ioutil.ReadAll(componentsList)
+						if err != nil {
+							fmt.Println(cWarning("\n\tError") + ": unable to read components list")
+							fmt.Print("\n")
+						}
 
 						// unmarshall the data into the ComponentList struct
-						cListErr := json.Unmarshal(byteValue, &cList)
-						helper.Check(cListErr)
+						err = json.Unmarshal(byteValue, &cList)
+						if err != nil {
+							fmt.Println(cWarning("\n\tError") + ": unable to unmarshall data into ComponentsList struct")
+							fmt.Print("\n")
+						}
 
 						// remove the component from the list []string
 						for index, value := range cList.ComponentList {
@@ -58,12 +67,18 @@ func RemoveComponent() cli.Command {
 						}
 
 						// transform back to JSON
-						componentsListJSON, componentsListJSONErr := json.MarshalIndent(cList, "", " ")
-						helper.Check(componentsListJSONErr)
+						componentsListJSON, err := json.MarshalIndent(cList, "", " ")
+						if err != nil {
+							fmt.Println(cWarning("\n\tError") + ": unable to marshall component list data")
+							fmt.Print("\n")
+						}
 
 						// Write the version change to the file
-						componentFileWriteErr := ioutil.WriteFile(helper.SilkRoot()+"/.silk/components.json", []byte(string(componentsListJSON)+"\n"), 0766)
-						helper.Check(componentFileWriteErr)
+						err = ioutil.WriteFile(helper.SilkRoot()+"/.silk/components.json", []byte(string(componentsListJSON)+"\n"), 0766)
+						if err != nil {
+							fmt.Println(cWarning("\n\tError") + ": unable to write to components file")
+							fmt.Print("\n")
+						}
 
 						// Confirmation message
 						fmt.Println("\tComponent " + cBold(componentName) + " successfully removed!")

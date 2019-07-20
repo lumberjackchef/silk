@@ -2,19 +2,26 @@ package helper
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // ChangesNotInCommitBuffer returns a []FilesChange list of all changes that are not in the current _root_ buffer
 func ChangesNotInCommitBuffer() []FileChange {
 	var allFileChanges []FileChange
+	cWarning := color.New(color.FgYellow).SprintFunc()
 
 	// Get each line from every file, creating new FileChange{}s
 	for _, file := range ListAllFiles() {
 		bufferFile, err := os.Open(file)
-		Check(err)
+		if err != nil {
+			fmt.Println(cWarning("\n\tError") + ": unable to open file")
+			fmt.Print("\n")
+		}
 		defer bufferFile.Close()
 
 		scanner := bufio.NewScanner(bufferFile)
@@ -92,6 +99,10 @@ func UnstagedFilesList() []string {
 func FilesInCommitBuffer() []string {
 	var files []string
 
+	if len(CommitBuffer().Changes) < 0 {
+		return []string{}
+	}
+
 	for _, change := range CommitBuffer().Changes {
 		files = append(files, change.FileName)
 	}
@@ -105,6 +116,7 @@ func FilesInCommitBuffer() []string {
 func FilesNotInCommitBuffer() []string {
 	var files []string
 	var filePath string
+	cWarning := color.New(color.FgYellow).SprintFunc()
 	addFile := true
 	index := 1
 
@@ -137,7 +149,11 @@ func FilesNotInCommitBuffer() []string {
 		index++
 		return nil
 	})
-	Check(err)
+
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to walk files not in the commit buffer")
+		fmt.Print("\n")
+	}
 
 	return files
 }

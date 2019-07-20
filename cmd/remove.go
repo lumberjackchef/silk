@@ -28,7 +28,10 @@ func Remove() cli.Command {
 					var isDir bool
 					fileName := fmt.Sprintf(c.Args().Get(0))
 					fi, err := os.Stat(fileName)
-					helper.Check(err)
+					if err != nil {
+						fmt.Println(cWarning("\n\tError") + ": unable to read file information")
+						fmt.Print("\n")
+					}
 
 					if fi.Mode().IsDir() {
 						isDir = true
@@ -49,14 +52,23 @@ func Remove() cli.Command {
 
 					// open buffer file & unmarshal
 					bufferFile, err := os.Open(helper.SilkRoot() + "/" + helper.RootDirectoryName + "/commit/buffer")
-					helper.Check(err)
+					if err != nil {
+						fmt.Println(cWarning("\n\tError") + ": unable to open commit buffer file")
+						fmt.Print("\n")
+					}
 					defer bufferFile.Close()
 
 					byteValue, err := ioutil.ReadAll(bufferFile)
-					helper.Check(err)
+					if err != nil {
+						fmt.Println(cWarning("\n\tError") + ": unable to read buffer file data")
+						fmt.Print("\n")
+					}
 
 					err = json.Unmarshal(byteValue, &commitBuffer)
-					helper.Check(err)
+					if err != nil {
+						fmt.Println(cWarning("\n\tError") + ": unable to unmarshal commit buffer data")
+						fmt.Print("\n")
+					}
 
 					if removeFile {
 						for _, chg := range oldChanges {
@@ -76,17 +88,26 @@ func Remove() cli.Command {
 							}
 							return nil
 						})
-						helper.Check(err)
+						if err != nil {
+							fmt.Println(cWarning("\n\tError") + ": unable to walk directory")
+							fmt.Print("\n")
+						}
 					}
 
 					// override oldChanges & add newChanges to buffer
 					commitBuffer.Changes = newChanges
 
 					commitBufferJSON, err := json.MarshalIndent(commitBuffer, "", "	")
-					helper.Check(err)
+					if err != nil {
+						fmt.Println(cWarning("\n\tError") + ": unable to marshal commit buffer data")
+						fmt.Print("\n")
+					}
 
 					err = ioutil.WriteFile(helper.SilkRoot()+"/.silk/commit/buffer", []byte(string(commitBufferJSON)+"\n"), 0766)
-					helper.Check(err)
+					if err != nil {
+						fmt.Println(cWarning("\n\tError") + ": unable to write to commit buffer")
+						fmt.Print("\n")
+					}
 
 					if removeFile {
 						fmt.Println("\n\t" + cWarning(fileName) + " has been removed from the commit buffer!")

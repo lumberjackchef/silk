@@ -3,19 +3,30 @@ package helper
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"os"
+
+	"github.com/fatih/color"
 )
 
 // CreateInitialCommitBuffer initiates the commit buffer and writes a new file
 func CreateInitialCommitBuffer() {
 	var allFileChanges []FileChange
+	cWarning := color.New(color.FgYellow).SprintFunc()
 	os.Chdir(SilkRoot() + "/")
 
 	// Creates the commit buffer file
-	createPathErr := os.MkdirAll(RootDirectoryName+"/commit", 0744)
-	Check(createPathErr)
+	err := os.MkdirAll(RootDirectoryName+"/commit", 0744)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to create project commit directory")
+		fmt.Print("\n")
+	}
+
 	commitBuffer, err := os.Create(RootDirectoryName + "/commit/buffer")
-	Check(err)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to create initial project commit buffer")
+		fmt.Print("\n")
+	}
 	defer commitBuffer.Close()
 
 	// TODO: meta data should be transferred on pull/push
@@ -27,7 +38,10 @@ func CreateInitialCommitBuffer() {
 	files := ListAllFiles()
 	for _, file := range files {
 		bufferFile, err := os.Open(file)
-		Check(err)
+		if err != nil {
+			fmt.Println(cWarning("\n\tError") + ": unable to open file to add to initial commit buffer")
+			fmt.Print("\n")
+		}
 		defer bufferFile.Close()
 
 		scanner := bufio.NewScanner(bufferFile)
@@ -55,6 +69,9 @@ func CreateInitialCommitBuffer() {
 		"	",
 	)
 
-	_, commitBufferWriteErr := commitBuffer.WriteString(string(commitBufferData) + "\n")
-	Check(commitBufferWriteErr)
+	_, err = commitBuffer.WriteString(string(commitBufferData) + "\n")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to write initial commit buffer file data")
+		fmt.Print("\n")
+	}
 }

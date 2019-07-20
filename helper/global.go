@@ -9,15 +9,7 @@ import (
 	"github.com/fatih/color"
 )
 
-// Check provides basic error checking & logging
-// TODO: implement better logging/error handling. Panic is not the only way to handle an error
-//       need to implement recovers as well
-// TODO: Move all error handling to an errors.go file/package?
-func Check(e error) {
-	if e != nil {
-		panic(e)
-	}
-}
+// TODO: Move all error handling to an errors.go file/package
 
 // CommandAction checks if this is a silk project before running a command
 func CommandAction(f func()) string {

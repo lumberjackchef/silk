@@ -16,9 +16,14 @@ Components List
 
 // CreateComponentList creates the root project components list
 func CreateComponentList(projectName string) {
+	cWarning := color.New(color.FgYellow).SprintFunc()
+
 	// Create a blank components list file
-	componentsList, componentsListErr := os.Create(RootDirectoryName + "/components.json")
-	Check(componentsListErr)
+	componentsList, err := os.Create(RootDirectoryName + "/components.json")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to create components file")
+		fmt.Print("\n")
+	}
 	defer componentsList.Close()
 
 	// Creates the components data & writes to the file
@@ -31,35 +36,54 @@ func CreateComponentList(projectName string) {
 		"  ",
 	)
 
-	_, componentsListWriteError := componentsList.WriteString(string(componentsListData) + "\n")
-	Check(componentsListWriteError)
+	_, err = componentsList.WriteString(string(componentsListData) + "\n")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to write components file data")
+		fmt.Print("\n")
+	}
 }
 
 // AddToSilkComponentList adds componentName to the list of components in .silk/components.json
 func AddToSilkComponentList(componentName string) error {
 	var componentFileData ComponentList
+	cWarning := color.New(color.FgYellow).SprintFunc()
 
 	// Open, Check, & defer closing of the component list file
-	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
-	Check(componentJSONFileErr)
+	componentJSONFile, err := os.Open(SilkRoot() + "/.silk/components.json")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to open components file")
+		fmt.Print("\n")
+	}
 	defer componentJSONFile.Close()
 
 	// Get the []byte version of the json data
-	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
-	Check(componentByteValueErr)
+	componentByteValue, err := ioutil.ReadAll(componentJSONFile)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to read components file")
+		fmt.Print("\n")
+	}
 
 	// Transform the []byte data into usable struct data
-	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
-	Check(componentJSONDataErr)
+	err = json.Unmarshal(componentByteValue, &componentFileData)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to unmarshal component file byte values")
+		fmt.Print("\n")
+	}
 
 	// Append the component name
 	componentFileData.ComponentList = append(componentFileData.ComponentList, componentName)
-	componentFileJSONData, componentFileJSONDataErr := json.MarshalIndent(componentFileData, "", "  ")
-	Check(componentFileJSONDataErr)
+	componentFileJSONData, err := json.MarshalIndent(componentFileData, "", "  ")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to unable to marshal component file json")
+		fmt.Print("\n")
+	}
 
 	// Write the component addition to the file
-	componentFileJSONDataWriteErr := ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentFileJSONData)+"\n"), 0766)
-	Check(componentFileJSONDataWriteErr)
+	err = ioutil.WriteFile(SilkRoot()+"/.silk/components.json", []byte(string(componentFileJSONData)+"\n"), 0766)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to write components file data")
+		fmt.Print("\n")
+	}
 
 	return nil
 }
@@ -75,14 +99,17 @@ func CreateComponentMetaFile(componentName string, componentConfigDirectory stri
 	cBold := color.New(color.Bold).SprintFunc()
 
 	// Component tracking directory. This Checks if the directory exists, creates it if not.
-	_, componentConfigErr := os.Stat(componentConfigDirectory)
-	if os.IsNotExist(componentConfigErr) {
+	_, err := os.Stat(componentConfigDirectory)
+	if os.IsNotExist(err) {
 		// creates the '{component}/.silk-component directory as well as the {component} directory if one or both don't exist
 		os.MkdirAll(componentConfigDirectory, 0766)
 
 		// Creates the project meta json file
-		componentMeta, componentMetaErr := os.Create(componentConfigDirectory + "/meta.json")
-		Check(componentMetaErr)
+		componentMeta, err := os.Create(componentConfigDirectory + "/meta.json")
+		if err != nil {
+			fmt.Println(cWarning("\n\tError") + ": unable to create component meta file")
+			fmt.Print("\n")
+		}
 		defer componentMeta.Close()
 
 		// Creates the project metadata & writes to the file
@@ -93,8 +120,11 @@ func CreateComponentMetaFile(componentName string, componentConfigDirectory stri
 			InitDate:      dT,
 			Version:       "0.0.0",
 		}, "", "  ")
-		_, componentMetaWriteErr := componentMeta.WriteString(string(componentMetaData) + "\n")
-		Check(componentMetaWriteErr)
+		_, err = componentMeta.WriteString(string(componentMetaData) + "\n")
+		if err != nil {
+			fmt.Println(cWarning("\n\tError") + ": unable to write to component meta file")
+			fmt.Print("\n")
+		}
 
 		// Adds component to component list file
 		AddToSilkComponentList(componentName)
@@ -113,19 +143,29 @@ Component Index
 // ComponentIndex returns a slice that lists all the components in .silk/components.json
 func ComponentIndex() []string {
 	var componentFileData ComponentList
+	cWarning := color.New(color.FgYellow).SprintFunc()
 
 	// Open, Check, & defer closing of the component list file
-	componentJSONFile, componentJSONFileErr := os.Open(SilkRoot() + "/.silk/components.json")
-	Check(componentJSONFileErr)
+	componentJSONFile, err := os.Open(SilkRoot() + "/.silk/components.json")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to open components file")
+		fmt.Print("\n")
+	}
 	defer componentJSONFile.Close()
 
 	// Get the []byte version of the json data
-	componentByteValue, componentByteValueErr := ioutil.ReadAll(componentJSONFile)
-	Check(componentByteValueErr)
+	componentByteValue, err := ioutil.ReadAll(componentJSONFile)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to read components file data")
+		fmt.Print("\n")
+	}
 
 	// Transform the []byte data into usable struct data
-	componentJSONDataErr := json.Unmarshal(componentByteValue, &componentFileData)
-	Check(componentJSONDataErr)
+	err = json.Unmarshal(componentByteValue, &componentFileData)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to unmarshal components file data")
+		fmt.Print("\n")
+	}
 
 	return componentFileData.ComponentList
 }

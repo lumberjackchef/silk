@@ -2,15 +2,23 @@ package helper
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 // CreateRootMetaFile creates the root project meta file
 func CreateRootMetaFile(projectName string) {
+	cWarning := color.New(color.FgYellow).SprintFunc()
+
 	// Creates the project meta json file
-	projectMeta, projectMetaErr := os.Create(RootDirectoryName + "/meta.json")
-	Check(projectMetaErr)
+	projectMeta, err := os.Create(RootDirectoryName + "/meta.json")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to create root meta file")
+		fmt.Print("\n")
+	}
 	defer projectMeta.Close()
 
 	// Creates the project metadata & writes to the file
@@ -25,6 +33,9 @@ func CreateRootMetaFile(projectName string) {
 		"  ",
 	)
 
-	_, projectMetaWriteErr := projectMeta.WriteString(string(projectMetaData) + "\n")
-	Check(projectMetaWriteErr)
+	_, err = projectMeta.WriteString(string(projectMetaData) + "\n")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to write project meta")
+		fmt.Print("\n")
+	}
 }

@@ -2,8 +2,11 @@ package helper
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/fatih/color"
 )
 
 // RootDirectoryName ...
@@ -11,24 +14,30 @@ const RootDirectoryName = ".silk"
 
 // SilkRoot returns the project root directory path
 func SilkRoot() string {
-	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
-	Check(currentWorkingDirectoryErr)
+	cWarning := color.New(color.FgYellow).SprintFunc()
+	currentWorkingDirectory, _ := os.Getwd()
 
-	returnPath, walkUpErr := walkUp(currentWorkingDirectory, RootDirectoryName)
-	Check(walkUpErr)
+	returnPath, err := walkUp(currentWorkingDirectory, RootDirectoryName)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to walk up current directory to get the project root path")
+		fmt.Print("\n")
+	}
 
 	return returnPath
 }
 
 // IsComponentOrRoot returns component, root, or false
 func IsComponentOrRoot() string {
+	cWarning := color.New(color.FgYellow).SprintFunc()
 	var partType string
 
-	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
-	Check(currentWorkingDirectoryErr)
+	currentWorkingDirectory, _ := os.Getwd()
 
-	checkReturnPath, checkReturnPathErr := CheckWalkUp(currentWorkingDirectory)
-	Check(checkReturnPathErr)
+	checkReturnPath, err := CheckWalkUp(currentWorkingDirectory)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to recursively check up the tree to determine if project or component")
+		fmt.Print("\n")
+	}
 
 	if checkReturnPath == "component" {
 		partType = "component"
@@ -43,23 +52,34 @@ func IsComponentOrRoot() string {
 
 // SilkComponentRoot returns the component root directory path
 func SilkComponentRoot() string {
-	currentWorkingDirectory, currentWorkingDirectoryErr := os.Getwd()
-	Check(currentWorkingDirectoryErr)
+	cWarning := color.New(color.FgYellow).SprintFunc()
+	currentWorkingDirectory, _ := os.Getwd()
 
-	returnPath, walkUpErr := walkUp(currentWorkingDirectory, ".silk-component")
-	Check(walkUpErr)
+	returnPath, err := walkUp(currentWorkingDirectory, ".silk-component")
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to walk up current tree to get the component root path")
+		fmt.Print("\n")
+	}
 
 	return returnPath
 }
 
 // CheckWalkUp is a separate function solely for recursion
 func CheckWalkUp(currentPath string) (string, error) {
-	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
-	Check(readCurrentPathErr)
+	cWarning := color.New(color.FgYellow).SprintFunc()
+
+	readCurrentPath, err := os.Open(currentPath)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to read current path")
+		fmt.Print("\n")
+	}
 	defer readCurrentPath.Close()
 
-	filesInCurrentDir, filesInCurrentDirErr := readCurrentPath.Readdir(-1)
-	Check(filesInCurrentDirErr)
+	filesInCurrentDir, err := readCurrentPath.Readdir(-1)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to read files in current directory")
+		fmt.Print("\n")
+	}
 
 	for _, file := range filesInCurrentDir {
 		if file.Name() == RootDirectoryName {
@@ -72,16 +92,22 @@ func CheckWalkUp(currentPath string) (string, error) {
 	// Checks if we're at the root, returns an error if true
 	// TODO: Make sure this works with all filesystem types including containerized environments
 	// Mac: '/', Windows: 'C:\', Linux: '/', (Docker: '/'?)
-	userRoot, userRootErr := filepath.Match("/", currentPath)
-	Check(userRootErr)
+	userRoot, err := filepath.Match("/", currentPath)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to find system root")
+		fmt.Print("\n")
+	}
 
 	if userRoot {
 		return "", nil
 	}
 
 	// Recursion
-	recursiveWalk, recursiveWalkErr := CheckWalkUp(filepath.Dir(currentPath))
-	Check(recursiveWalkErr)
+	recursiveWalk, err := CheckWalkUp(filepath.Dir(currentPath))
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to recursively check up the tree")
+		fmt.Print("\n")
+	}
 
 	return recursiveWalk, nil
 }
@@ -89,12 +115,20 @@ func CheckWalkUp(currentPath string) (string, error) {
 // TODO: combine with global helper checkWalkUp
 // walkUp allows us to walk up the file tree looking for a certain file name as an anchor, returns the directory path of the anchor
 func walkUp(currentPath string, directoryName string) (string, error) {
-	readCurrentPath, readCurrentPathErr := os.Open(currentPath)
-	Check(readCurrentPathErr)
+	cWarning := color.New(color.FgYellow).SprintFunc()
+
+	readCurrentPath, err := os.Open(currentPath)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to read current path")
+		fmt.Print("\n")
+	}
 	defer readCurrentPath.Close()
 
-	filesInCurrentDir, filesInCurrentDirErr := readCurrentPath.Readdir(-1)
-	Check(filesInCurrentDirErr)
+	filesInCurrentDir, err := readCurrentPath.Readdir(-1)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to read files in current directory")
+		fmt.Print("\n")
+	}
 
 	for _, file := range filesInCurrentDir {
 		if file.Name() == directoryName {
@@ -105,8 +139,11 @@ func walkUp(currentPath string, directoryName string) (string, error) {
 	// Checks if we're at the root, returns an error if true
 	// TODO: Make sure this works with all filesystem types including containerized environments
 	// Mac: '/', Windows: 'C:\', Linux: '/', (Docker: '/'?): filepath.VolumeName(path)?
-	userRoot, userRootErr := filepath.Match("/", currentPath)
-	Check(userRootErr)
+	userRoot, err := filepath.Match("/", currentPath)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to find system root")
+		fmt.Print("\n")
+	}
 
 	if userRoot {
 		// TODO: this should invoke the "not a silk project" line instead
@@ -114,8 +151,11 @@ func walkUp(currentPath string, directoryName string) (string, error) {
 	}
 
 	// Recursion
-	recursiveWalk, recursiveWalkErr := walkUp(filepath.Dir(currentPath), directoryName)
-	Check(recursiveWalkErr)
+	recursiveWalk, err := walkUp(filepath.Dir(currentPath), directoryName)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to recursively check up the tree")
+		fmt.Print("\n")
+	}
 
 	return recursiveWalk, nil
 }

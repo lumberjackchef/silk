@@ -2,19 +2,26 @@ package helper
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/fatih/color"
 )
 
 // CustomExclusionList returns the list of files user has decided to exclude from status/commit based on contents of .silk-ignore
 func CustomExclusionList() []string {
+	cWarning := color.New(color.FgYellow).SprintFunc()
 	var exclusionList []string
 
 	// TODO: Fix this to be component/root agnostic
 	if _, err := os.Stat(SilkRoot() + "/.silk-ignore"); !os.IsNotExist(err) {
-		ignoreFile, ignoreFileErr := os.Open(SilkRoot() + "/.silk-ignore")
-		Check(ignoreFileErr)
+		ignoreFile, err := os.Open(SilkRoot() + "/.silk-ignore")
+		if err != nil {
+			fmt.Println(cWarning("\n\tError") + ": unable to open silk ignore file")
+			fmt.Print("\n")
+		}
 		defer ignoreFile.Close()
 
 		scanner := bufio.NewScanner(ignoreFile)
@@ -54,6 +61,7 @@ func IsNotExcluded(path string, info os.FileInfo) bool {
 
 // ListAllFiles returns an array of file names based on project root
 func ListAllFiles() []string {
+	cWarning := color.New(color.FgYellow).SprintFunc()
 	var files []string
 	var currentWorkingDirectory string
 
@@ -69,7 +77,10 @@ func ListAllFiles() []string {
 		}
 		return nil
 	})
-	Check(err)
+	if err != nil {
+		fmt.Println(cWarning("\n\tError") + ": unable to walk current working directory")
+		fmt.Print("\n")
+	}
 
 	return files
 }

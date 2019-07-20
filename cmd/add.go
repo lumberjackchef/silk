@@ -28,7 +28,10 @@ func Add() cli.Command {
 
 					// TODO: make sure this is root/component relevant?
 					fi, err := os.Stat(fileName)
-					helper.Check(err)
+					if err != nil {
+						fmt.Println(cWarning("\n\tError") + ": unable to unable to read file information")
+						fmt.Print("\n")
+					}
 
 					if fi.Mode().IsDir() {
 						isDir = true
@@ -57,7 +60,10 @@ func Add() cli.Command {
 							}
 							return nil
 						})
-						helper.Check(err)
+						if err != nil {
+							fmt.Println(cWarning("\n\tError") + ": unable to walk directory")
+							fmt.Print("\n")
+						}
 
 						if len(files) > 0 {
 							fmt.Printf("\n\tFiles added to the commit buffer: \n")
